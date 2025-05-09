@@ -1,0 +1,13 @@
+<Project>
+	<PropertyGroup>
+		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+		<CentralPackageVersionOverrideEnabled>false</CentralPackageVersionOverrideEnabled>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageVersion Include="Kentico.Xperience.WebApp" Version="30.4.2" />
+		<PackageVersion Include="Kentico.Xperience.AzureStorage" Version="30.4.2" />
+		<PackageVersion Include="Kentico.Xperience.Admin" Version="30.4.2" />
+	</ItemGroup>
+</Project>
