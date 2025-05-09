@@ -5,15 +5,28 @@
 A community-driven package for Xperience by Kentico, offering sustainability impact checking for pages.
 Adapted from the [Umbraco.Community.Sustainability](https://github.com/umbraco-community/Umbraco.Community.Sustainability) project and extended for the Kentico ecosystem.
 
-## WORK IN PROGRESS
+## Screenshots
 
+**THIS IS A WORK IN PROGRESS**
 
+## Library Version Matrix
+
+**THIS IS A WORK IN PROGRESS**
+
+| Xperience Version | Library Version |
+| ----------------- | --------------- |
+| >= 30.4.2         | 1.0.0           |
+
+## Dependencies
+
+- [ASP.NET Core 8.0](https://dotnet.microsoft.com/en-us/download)
+- [Xperience by Kentico](https://docs.xperience.io/xp/changelog)
+
+## Package Installation
+
+**THIS IS A WORK IN PROGRESS**
  
-` AddXperienceCommunitySustainability()`
-
-
-
-
+`TODO: AddXperienceCommunitySustainability()`
 
 ## Contributing
 
