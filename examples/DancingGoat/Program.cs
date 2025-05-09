@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
+﻿using CMS.Base;
 using DancingGoat;
 using DancingGoat.Helpers.Generators;
 using DancingGoat.Models;
-
-using CMS.Base;
-
 using Kentico.Activities.Web.Mvc;
 using Kentico.Commerce.Web.Mvc;
 using Kentico.Content.Web.Mvc.Routing;
@@ -15,19 +9,20 @@ using Kentico.Membership;
 using Kentico.OnlineMarketing.Web.Mvc;
 using Kentico.PageBuilder.Web.Mvc;
 using Kentico.Web.Mvc;
-
-
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
 using Samples.DancingGoat;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using XperienceCommunity.Sustainability.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +62,8 @@ builder.Services.AddLocalization()
 
 builder.Services.AddDancingGoatServices();
 builder.Services.AddSingleton<IEmailActivityTrackingEvaluator, EmailActivityTrackingEvaluator>();
+
+builder.Services.AddXperienceCommunitySustainability();
 
 ConfigureMembershipServices(builder.Services);
 

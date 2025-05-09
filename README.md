@@ -7,6 +7,14 @@ Adapted from the [Umbraco.Community.Sustainability](https://github.com/umbraco-c
 
 ## WORK IN PROGRESS
 
+
+ 
+` AddXperienceCommunitySustainability()`
+
+
+
+
+
 ## Contributing
 
 Feel free to submit issues or pull requests to the repository, this is a community package and everyone is welcome to support.

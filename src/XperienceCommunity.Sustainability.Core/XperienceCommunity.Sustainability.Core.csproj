@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<ItemGroup>
+		<PackageReference Include="Kentico.Xperience.webapp" />
+		<PackageReference Include="Kentico.Xperience.admin" />
+		<PackageReference Include="Microsoft.Playwright" />
+	</ItemGroup>
+</Project>

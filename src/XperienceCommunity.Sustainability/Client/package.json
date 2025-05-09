@@ -1,0 +1,41 @@
+{
+  "name": "sustainability-web-admin",
+  "version": "1.0.0",
+  "description": "Custom Kentico Xperience administration project.",
+  "private": true,
+  "scripts": {
+    "start": "webpack serve --mode development",
+    "dev:buildlike": "webpack serve --mode development --env buildlike=true",
+    "build": "webpack --mode=production"
+  },
+  "dependencies": {
+    "@kentico/xperience-admin-base": "30.4.2",
+    "@kentico/xperience-admin-components": "30.4.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/plugin-transform-runtime": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.27.0",
+    "@kentico/xperience-webpack-config": "30.4.2",
+    "@types/react": "^18.3.20",
+    "@types/react-dom": "^18.3.6",
+    "babel-loader": "^10.0.0",
+    "webpack": "5.99.5",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1"
+  },
+  "overrides": {
+    "react": "$react",
+    "react-dom": "$react",
+    "json-joy": ">= 11.19.0"
+  },
+  "browserslist": [
+    "> .2% and last 3 versions",
+    "not op_mini all",
+    "not IE 11"
+  ]
+}
