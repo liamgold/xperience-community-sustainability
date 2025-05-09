@@ -9,5 +9,6 @@
 		<PackageVersion Include="Kentico.Xperience.WebApp" Version="30.4.2" />
 		<PackageVersion Include="Kentico.Xperience.AzureStorage" Version="30.4.2" />
 		<PackageVersion Include="Kentico.Xperience.Admin" Version="30.4.2" />
+		<PackageVersion Include="Kentico.Xperience.ImageProcessing" Version="30.4.2" />
 	</ItemGroup>
 </Project>
