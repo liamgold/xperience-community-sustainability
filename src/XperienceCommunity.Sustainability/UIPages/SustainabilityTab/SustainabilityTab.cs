@@ -11,7 +11,7 @@ using XperienceCommunity.Sustainability.Services;
     uiPageType: typeof(SustainabilityTab),
     name: "Sustainability",
     templateName: "@sustainability/web-admin/SustainabilityTab",
-    order: 700,
+    order: 20000,
     Icon = Icons.Earth)]
 
 namespace XperienceCommunity.Sustainability.Admin;
