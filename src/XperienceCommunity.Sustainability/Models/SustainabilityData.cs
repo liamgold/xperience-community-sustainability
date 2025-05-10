@@ -1,4 +1,4 @@
-﻿namespace XperienceCommunity.Sustainability.Core.Models;
+﻿namespace XperienceCommunity.Sustainability.Models;
 
 public record SustainabilityData
 {

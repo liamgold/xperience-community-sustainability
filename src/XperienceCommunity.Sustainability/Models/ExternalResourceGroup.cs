@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using XperienceCommunity.Sustainability.Core.Extensions;
+using XperienceCommunity.Sustainability.Extensions;
 
-namespace XperienceCommunity.Sustainability.Core.Models;
+namespace XperienceCommunity.Sustainability.Models;
 
 public class ExternalResourceGroup
 {

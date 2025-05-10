@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace XperienceCommunity.Sustainability.Core.Models;
+namespace XperienceCommunity.Sustainability.Models;
 
 public class ExternalResource
 {

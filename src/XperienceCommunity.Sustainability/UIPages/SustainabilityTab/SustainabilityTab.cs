@@ -3,7 +3,7 @@ using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.Base.Authentication;
 using Kentico.Xperience.Admin.Websites.UIPages;
 using XperienceCommunity.Sustainability.Admin;
-using XperienceCommunity.Sustainability.Core.Services;
+using XperienceCommunity.Sustainability.Services;
 
 [assembly: UIPage(
     parentType: typeof(WebPageLayout),

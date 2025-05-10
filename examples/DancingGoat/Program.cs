@@ -22,7 +22,7 @@ using Samples.DancingGoat;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using XperienceCommunity.Sustainability.Core;
+using XperienceCommunity.Sustainability;
 
 var builder = WebApplication.CreateBuilder(args);
 

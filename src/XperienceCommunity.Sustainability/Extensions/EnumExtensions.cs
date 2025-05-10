@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace XperienceCommunity.Sustainability.Core.Extensions;
+namespace XperienceCommunity.Sustainability.Extensions;
 
 public static class EnumExtensions
 {

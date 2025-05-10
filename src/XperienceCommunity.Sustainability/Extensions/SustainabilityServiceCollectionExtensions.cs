@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using XperienceCommunity.Sustainability.Core.Services;
+using XperienceCommunity.Sustainability.Services;
 
-namespace XperienceCommunity.Sustainability.Core;
+namespace XperienceCommunity.Sustainability;
 
 public static class SustainabilityServiceCollectionExtensions
 {

@@ -3,9 +3,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 using System.Text.Json;
-using XperienceCommunity.Sustainability.Core.Models;
+using XperienceCommunity.Sustainability.Models;
 
-namespace XperienceCommunity.Sustainability.Core.Services;
+namespace XperienceCommunity.Sustainability.Services;
 
 public interface ISustainabilityService
 {
