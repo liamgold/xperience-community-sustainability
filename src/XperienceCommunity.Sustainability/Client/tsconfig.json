@@ -1,7 +1,10 @@
-// Provides recommended TypeScript configuration 
+// Provides recommended TypeScript configuration
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "target": "es6",
     "module": "esnext",
     "moduleResolution": "node",
