@@ -73,25 +73,28 @@ export const SustainabilityTabTemplate = (
 
   if (data === undefined || data === null) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] p-4">
-        <Card className="w-full max-w-md text-center bg-card text-card-foreground">
-          <CardHeader>
-            <CardTitle className="text-xl">
-              No Sustainability Data Found
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground">
-              We haven't retrieved any sustainability data for this page yet.
-            </p>
-            <Button
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => submit()}
-            >
-              Run Sustainability Report
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="p-4 space-y-4">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          Sustainability Report
+        </h1>
+
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-md text-center bg-card text-card-foreground">
+            <CardHeader>
+              <CardTitle className="text-xl">
+                No Sustainability Data Found
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                We haven’t retrieved any sustainability data for this page yet.
+              </p>
+              <Button onClick={() => submit()}>
+                Run Sustainability Report
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -110,74 +113,80 @@ export const SustainabilityTabTemplate = (
     );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
-      {/* Left column: Resource groups */}
-      <div className="md:col-span-2 space-y-4">
-        {data.resourceGroups.map((group) => (
-          <Card key={group.type}>
+    <div className="p-4 space-y-4">
+      {/* New Title */}
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+        Sustainability Report
+      </h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Left column: Resource groups */}
+        <div className="md:col-span-2 space-y-4">
+          {data.resourceGroups.map((group) => (
+            <Card key={group.type}>
+              <CardHeader>
+                <CardTitle>{group.name}</CardTitle>
+                <CardDescription>
+                  Total size: {group.totalSize.toFixed(2)}KB
+                </CardDescription>
+              </CardHeader>
+              <CardContent>{renderResourceList(group.resources)}</CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Right column: Summary */}
+        <div className="space-y-4">
+          <Card className="max-w-sm w-full">
             <CardHeader>
-              <CardTitle>{group.name}</CardTitle>
+              <CardTitle>Sustainability report</CardTitle>
+              <CardDescription>Last tested: {data.lastRunDate}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => submit()}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 w-full"
+              >
+                Run again
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="max-w-sm w-full">
+            <CardHeader>
+              <CardTitle>Page size</CardTitle>
+            </CardHeader>
+            <CardContent className="text-xl font-semibold">
+              {data.totalSize.toFixed(2)}KB
+            </CardContent>
+          </Card>
+
+          <Card className="max-w-sm w-full">
+            <CardHeader>
+              <CardTitle>CO₂ per page view</CardTitle>
+            </CardHeader>
+            <CardContent className="text-xl font-semibold">
+              {data.totalEmissions.toFixed(4)}g
+            </CardContent>
+          </Card>
+
+          {/* Carbon rating */}
+          <Card className="max-w-sm w-full">
+            <CardHeader>
+              <CardTitle>Carbon rating</CardTitle>
               <CardDescription>
-                Total size: {group.totalSize.toFixed(2)}KB
+                {ratingDescriptions[data.carbonRating] || "No rating available"}
               </CardDescription>
             </CardHeader>
-            <CardContent>{renderResourceList(group.resources)}</CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Right column: Summary */}
-      <div className="space-y-4">
-        <Card className="max-w-sm w-full">
-          <CardHeader>
-            <CardTitle>Sustainability report</CardTitle>
-            <CardDescription>Last tested: {data.lastRunDate}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              onClick={() => submit()}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 w-full"
+            <CardContent
+              className={cn(
+                "text-3xl font-bold",
+                ratingColor[data.carbonRating] || "text-muted-foreground"
+              )}
             >
-              Run again
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="max-w-sm w-full">
-          <CardHeader>
-            <CardTitle>Page size</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xl font-semibold">
-            {data.totalSize.toFixed(2)}KB
-          </CardContent>
-        </Card>
-
-        <Card className="max-w-sm w-full">
-          <CardHeader>
-            <CardTitle>CO₂ per page view</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xl font-semibold">
-            {data.totalEmissions.toFixed(4)}g
-          </CardContent>
-        </Card>
-
-        {/* Carbon rating */}
-        <Card className="max-w-sm w-full">
-          <CardHeader>
-            <CardTitle>Carbon rating</CardTitle>
-            <CardDescription>
-              {ratingDescriptions[data.carbonRating] || "No rating available"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent
-            className={cn(
-              "text-3xl font-bold",
-              ratingColor[data.carbonRating] || "text-muted-foreground"
-            )}
-          >
-            {data.carbonRating}
-          </CardContent>
-        </Card>
+              {data.carbonRating}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
