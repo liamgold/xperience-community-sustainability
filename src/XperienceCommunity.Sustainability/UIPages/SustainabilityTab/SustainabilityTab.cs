@@ -36,8 +36,9 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
 
     public override async Task<SustainabilityTabProperties> ConfigureTemplateProperties(SustainabilityTabProperties properties)
     {
+        // TODO: if the page is masterpage/folder, then we can't run the report. Display a message.
 
-        // populate from stored data?
+        // TODO: if report has already been ran, populate from stored data in custom module.
 
         return properties;
     }
