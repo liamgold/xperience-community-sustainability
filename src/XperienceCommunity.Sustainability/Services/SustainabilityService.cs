@@ -84,10 +84,11 @@ public class SustainabilityService : ISustainabilityService
 
         return new SustainabilityResponse
         {
-            TotalSize = sustainabilityData.pageWeight ?? 0,
+            TotalSize = (sustainabilityData.pageWeight ?? 0) / 1024m,
             TotalEmissions = sustainabilityData.emissions?.co2 ?? 0,
             CarbonRating = sustainabilityData.carbonRating,
-            ResourceGroups = resourceGroups
+            ResourceGroups = resourceGroups,
+            LastRunDate = DateTime.UtcNow.ToString("MMMM dd, yyyy h:mm tt"),
         };
     }
 
@@ -106,12 +107,12 @@ public class SustainabilityService : ISustainabilityService
             }
 
             transferSize += resource.transferSize.GetValueOrDefault();
-            resourceList.Add(new ExternalResource(resource.name, resource.transferSize));
+            resourceList.Add(new ExternalResource(resource.name, (resource.transferSize ?? 0) / 1024m));
         }
 
         return new ExternalResourceGroup(groupType)
         {
-            TotalSize = transferSize,
+            TotalSize = transferSize / 1024m,
             Resources = resourceList
         };
     }

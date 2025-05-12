@@ -36,13 +36,14 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
 
     public override async Task<SustainabilityTabProperties> ConfigureTemplateProperties(SustainabilityTabProperties properties)
     {
-        properties.Label = "Click the button to get sustainability data.";
+
+        // populate from stored data?
 
         return properties;
     }
 
     [PageCommand]
-    public async Task<SustainabilityResponseResult> SetLabel()
+    public async Task<SustainabilityResponseResult> RunReport()
     {
         var webPageUrl = await _webPageUrlRetriever.Retrieve(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
         var absoluteUrl = webPageUrl.AbsoluteUrl;
@@ -60,5 +61,5 @@ public readonly record struct SustainabilityResponseResult(SustainabilityRespons
 
 public sealed class SustainabilityTabProperties : TemplateClientProperties
 {
-    public string? Label { get; set; }
+    public SustainabilityResponseResult? SustainabilityData { get; set; }
 }

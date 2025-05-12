@@ -5,7 +5,7 @@ namespace XperienceCommunity.Sustainability.Models;
 public class SustainabilityResponse
 {
     [JsonProperty("lastRunDate")]
-    public DateTime LastRunDate { get; set; } = DateTime.UtcNow;
+    public string LastRunDate { get; set; } = string.Empty;
 
     [JsonProperty("totalSize")]
     public decimal TotalSize { get; set; } = 0;
