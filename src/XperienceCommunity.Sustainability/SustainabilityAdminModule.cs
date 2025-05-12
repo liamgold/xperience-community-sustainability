@@ -4,18 +4,10 @@ using Path = CMS.IO.Path;
 
 [assembly: CMS.RegisterModule(typeof(SustainabilityAdminModule))]
 
-[assembly: UICategory(
-    codeName: SustainabilityAdminModule.CUSTOM_CATEGORY,
-    name: "Custom",
-    icon: Icons.CustomElement,
-    order: 100)]
-
 namespace XperienceCommunity.Sustainability
 {
     internal class SustainabilityAdminModule : AdminModule
     {
-        public const string CUSTOM_CATEGORY = "sustainability.web.admin.category";
-
         public SustainabilityAdminModule()
             : base(nameof(SustainabilityAdminModule))
         {
