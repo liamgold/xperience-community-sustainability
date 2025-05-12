@@ -8,11 +8,11 @@ public class ExternalResource
     public string? Url { get; set; }
 
     [JsonProperty("size")]
-    public int? Size { get; set; } = 0;
+    public decimal? Size { get; set; } = 0;
 
     public ExternalResource() { }
 
-    public ExternalResource(string url, int? size)
+    public ExternalResource(string url, decimal? size)
     {
         Url = url;
         Size = size;

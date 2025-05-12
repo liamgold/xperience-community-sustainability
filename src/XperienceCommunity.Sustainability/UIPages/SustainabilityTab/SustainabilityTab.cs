@@ -3,6 +3,7 @@ using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.Base.Authentication;
 using Kentico.Xperience.Admin.Websites.UIPages;
 using XperienceCommunity.Sustainability.Admin;
+using XperienceCommunity.Sustainability.Models;
 using XperienceCommunity.Sustainability.Services;
 
 [assembly: UIPage(
@@ -35,31 +36,30 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
 
     public override async Task<SustainabilityTabProperties> ConfigureTemplateProperties(SustainabilityTabProperties properties)
     {
-        properties.Label = "Click the button to get sustainability data.";
+
+        // populate from stored data?
 
         return properties;
     }
 
     [PageCommand]
-    public async Task<ResponseResult> SetLabel()
+    public async Task<SustainabilityResponseResult> RunReport()
     {
         var webPageUrl = await _webPageUrlRetriever.Retrieve(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
         var absoluteUrl = webPageUrl.AbsoluteUrl;
 
         var sustainabilityData = await _sustainabilityService.GetSustainabilityData(absoluteUrl);
 
-        return new ResponseResult
+        return new SustainabilityResponseResult
         {
-            Label = sustainabilityData?.TotalEmissions != null
-                ? $"TotalEmissions:{sustainabilityData.TotalEmissions:F4}g - recorded at {DateTime.UtcNow.ToShortTimeString()} - {Guid.NewGuid()}"
-                : "No data"
+            SustainabilityData = sustainabilityData,
         };
     }
 }
 
-public readonly record struct ResponseResult(string Label);
+public readonly record struct SustainabilityResponseResult(SustainabilityResponse? SustainabilityData);
 
 public sealed class SustainabilityTabProperties : TemplateClientProperties
 {
-    public string? Label { get; set; }
+    public SustainabilityResponseResult? SustainabilityData { get; set; }
 }
