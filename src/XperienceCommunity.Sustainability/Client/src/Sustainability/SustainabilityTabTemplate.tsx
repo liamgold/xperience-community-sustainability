@@ -10,7 +10,13 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePageCommand } from "@kentico/xperience-admin-base";
 
+enum PageAvailabilityStatus {
+  Available,
+  NotAvailable,
+}
+
 interface SustainabilityTabTemplateProps {
+  pageAvailability: PageAvailabilityStatus;
   sustainabilityData: SustainabilityData;
 }
 
@@ -86,12 +92,23 @@ export const SustainabilityTabTemplate = (
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                We haven’t retrieved any sustainability data for this page yet.
-              </p>
-              <Button onClick={() => submit()}>
-                Run Sustainability Report
-              </Button>
+              {props?.pageAvailability === PageAvailabilityStatus.Available ? (
+                <>
+                  <p className="text-muted-foreground">
+                    We haven't retrieved any sustainability data for this page
+                    yet.
+                  </p>
+                  <Button onClick={() => submit()}>
+                    Run Sustainability Report
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="text-muted-foreground">
+                    The page is not available, so we cannot retrieve the data.
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

@@ -1,4 +1,5 @@
-﻿using CMS.Websites;
+﻿using CMS.ContentEngine;
+using CMS.Websites;
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.Base.Authentication;
 using Kentico.Xperience.Admin.Websites.UIPages;
@@ -21,25 +22,43 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
 {
     private readonly IWebPageUrlRetriever _webPageUrlRetriever;
     private readonly ISustainabilityService _sustainabilityService;
+    private readonly IContentQueryExecutor _contentQueryExecutor;
 
     public SustainabilityTab(
         IWebPageManagerFactory webPageManagerFactory,
         IAuthenticatedUserAccessor authenticatedUserAccessor,
         IPageLinkGenerator pageLinkGenerator,
         ISustainabilityService sustainabilityService,
-        IWebPageUrlRetriever webPageUrlRetriever)
+        IWebPageUrlRetriever webPageUrlRetriever,
+        IContentQueryExecutor contentQueryExecutor)
         : base(authenticatedUserAccessor, webPageManagerFactory, pageLinkGenerator)
     {
         _sustainabilityService = sustainabilityService;
         _webPageUrlRetriever = webPageUrlRetriever;
+        _contentQueryExecutor = contentQueryExecutor;
     }
 
     public override async Task<SustainabilityTabProperties> ConfigureTemplateProperties(SustainabilityTabProperties properties)
     {
-        // TODO: if the page is masterpage/folder, then we can't run the report. Display a message.
+        var builder = new ContentItemQueryBuilder()
+            .ForContentTypes(query =>
+            {
+                query.ForWebsite([WebPageIdentifier.WebPageItemID]);
+            })
+            .InLanguage(WebPageIdentifier.LanguageName);
+
+        var currentPage = (await _contentQueryExecutor.GetMappedWebPageResult<IWebPageFieldsSource>(builder)).FirstOrDefault();
+
+        // If the current page doesn't have IWebPageFieldsSource interface, we can't run the report. It's most likely a root page or a folder.
+        if (currentPage is null)
+        {
+            properties.PageAvailability = PageAvailabilityStatus.NotAvailable;
+            return properties;
+        }
 
         // TODO: if report has already been ran, populate from stored data in custom module.
 
+        properties.PageAvailability = PageAvailabilityStatus.Available;
         return properties;
     }
 
@@ -62,5 +81,13 @@ public readonly record struct SustainabilityResponseResult(SustainabilityRespons
 
 public sealed class SustainabilityTabProperties : TemplateClientProperties
 {
+    public PageAvailabilityStatus PageAvailability { get; set; }
+
     public SustainabilityResponseResult? SustainabilityData { get; set; }
+}
+
+public enum PageAvailabilityStatus
+{
+    Available,
+    NotAvailable
 }
