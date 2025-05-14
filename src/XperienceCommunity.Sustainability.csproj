@@ -9,7 +9,7 @@
 	</ItemGroup>
 
 	<PropertyGroup>
-		<Title>Xperience by Kentico Image Processing</Title>
+		<Title>Xperience by Kentico Sustainability</Title>
 		<PackageId>XperienceCommunity.Sustainability</PackageId>
 		<Version>0.1.5</Version>
 		<Authors>Liam Goldfinch</Authors>
