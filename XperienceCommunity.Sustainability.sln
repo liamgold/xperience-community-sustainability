@@ -23,7 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{26EDA3E6-9
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XperienceCommunity.Sustainability", "src\XperienceCommunity.Sustainability\XperienceCommunity.Sustainability.csproj", "{90047860-A28D-403C-9C16-8794098522C3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XperienceCommunity.Sustainability", "src\XperienceCommunity.Sustainability.csproj", "{90047860-A28D-403C-9C16-8794098522C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

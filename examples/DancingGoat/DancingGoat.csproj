@@ -29,6 +29,6 @@
     <PackageReference Include="kentico.xperience.webapp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\XperienceCommunity.Sustainability\XperienceCommunity.Sustainability.csproj" />
+    <ProjectReference Include="..\..\src\XperienceCommunity.Sustainability.csproj" />
   </ItemGroup>
 </Project>

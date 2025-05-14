@@ -5,7 +5,7 @@ VisualStudioVersion = 17.12.35514.174
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DancingGoat", "DancingGoat.csproj", "{0B62B1B0-5215-43F1-91F6-F79EAF2FEA6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XperienceCommunity.Sustainability", "..\..\src\XperienceCommunity.Sustainability\XperienceCommunity.Sustainability.csproj", "{676486D9-9C07-4027-B822-5B94B8A952C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XperienceCommunity.Sustainability", "..\..\src\XperienceCommunity.Sustainability.csproj", "{676486D9-9C07-4027-B822-5B94B8A952C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

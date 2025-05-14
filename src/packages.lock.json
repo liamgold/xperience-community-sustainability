@@ -1002,6 +1002,14 @@
         "dependencies": {
           "System.IO.Hashing": "8.0.0"
         }
+      },
+      "xperiencecommunity.sustainability.core": {
+        "type": "Project",
+        "dependencies": {
+          "Kentico.Xperience.admin": "[30.4.2, )",
+          "Kentico.Xperience.webapp": "[30.4.2, )",
+          "Microsoft.Playwright": "[1.52.0, )"
+        }
       }
     }
   }
