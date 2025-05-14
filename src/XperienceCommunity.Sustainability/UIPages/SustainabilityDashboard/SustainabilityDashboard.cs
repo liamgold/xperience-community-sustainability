@@ -17,7 +17,7 @@ namespace XperienceCommunity.Sustainability.Admin
     {
         public override Task<CustomLayoutProperties> ConfigureTemplateProperties(CustomLayoutProperties properties)
         {
-            properties.Label = "TODO:.";
+            properties.Label = "Coming soon: https://github.com/liamgold/xperience-community-sustainability/issues/4";
             return Task.FromResult(properties);
         }
     }

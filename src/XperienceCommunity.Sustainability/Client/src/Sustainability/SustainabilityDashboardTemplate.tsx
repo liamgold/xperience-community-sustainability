@@ -22,7 +22,7 @@ export const SustainabilityDashboardTemplate = ({
   return (
     <div>
       <h1>{labelValue}</h1>
-      <p>things will be here eventually.</p>
+      <p>Coming soon: https://github.com/liamgold/xperience-community-sustainability/issues/4.</p>
     </div>
   );
 };
