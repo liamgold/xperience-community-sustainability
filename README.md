@@ -7,11 +7,13 @@ Adapted from the [Umbraco.Community.Sustainability](https://github.com/umbraco-c
 
 ## Screenshots
 
-**THIS IS A WORK IN PROGRESS**
+Once installed, a new tab appears for each page in your web channels. The Sustainability tab allows content editors and marketers to see and benchmark page weight and carbon emissions, which is then converted to a carbon rating for individual pages.
+
+<a href="/src/images/Sustainability Report - Page Tab.png">
+  <img src="/src/images/Sustainability Report - Page Tab.png" width="800" alt="CSP Management module in navigation">
+</a>
 
 ## Library Version Matrix
-
-**THIS IS A WORK IN PROGRESS**
 
 | Xperience Version | Library Version |
 | ----------------- | --------------- |
@@ -24,9 +26,29 @@ Adapted from the [Umbraco.Community.Sustainability](https://github.com/umbraco-c
 
 ## Package Installation
 
-**THIS IS A WORK IN PROGRESS**
- 
-`TODO: AddXperienceCommunitySustainability()`
+Add the package to your application using the .NET CLI
+
+```powershell
+dotnet add package XperienceCommunity.Sustainability
+```
+
+## Quick Start
+
+1. Install NuGet package above.
+
+1. Register the Sustainability services using `builder.Services.AddXperienceCommunitySustainability()`:
+
+   ```csharp
+   // Program.cs
+
+   var builder = WebApplication.CreateBuilder(args);
+
+   builder.Services.AddKentico();
+
+   // ...
+
+   builder.Services.AddXperienceCommunitySustainability();
+   ```
 
 ## Contributing
 
