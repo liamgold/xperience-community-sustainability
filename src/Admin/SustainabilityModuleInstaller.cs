@@ -1,7 +1,6 @@
 ﻿using CMS.DataEngine;
 using CMS.FormEngine;
 using CMS.Modules;
-using CMS.Scheduler;
 using static XperienceCommunity.Sustainability.Admin.SustainabilityConstants;
 
 namespace XperienceCommunity.Sustainability.Admin;
@@ -11,7 +10,7 @@ internal interface ISustainabilityModuleInstaller
     void Install();
 }
 
-internal class SustainabilityModuleInstaller(IInfoProvider<ResourceInfo> resourceInfoProvider, IInfoProvider<ScheduledTaskConfigurationInfo> taskInfoProvider) : ISustainabilityModuleInstaller
+internal class SustainabilityModuleInstaller(IInfoProvider<ResourceInfo> resourceInfoProvider) : ISustainabilityModuleInstaller
 {
     public void Install()
     {
