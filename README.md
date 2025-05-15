@@ -10,7 +10,7 @@ Adapted from the [Umbraco.Community.Sustainability](https://github.com/umbraco-c
 Once installed, a new tab appears for each page in your web channels. The Sustainability tab allows content editors and marketers to see and benchmark page weight and carbon emissions, which is then converted to a carbon rating for individual pages.
 
 <a href="/src/images/Sustainability Report - Page Tab.png">
-  <img src="/src/images/Sustainability Report - Page Tab.png" width="800" alt="CSP Management module in navigation">
+  <img src="/src/images/Sustainability Report - Page Tab.png" width="800" alt="Sustainability Tab for pages in Xperience by Kentico">
 </a>
 
 ## Library Version Matrix

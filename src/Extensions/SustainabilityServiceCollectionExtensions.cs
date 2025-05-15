@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using XperienceCommunity.Sustainability.Admin;
 using XperienceCommunity.Sustainability.Services;
 
 namespace XperienceCommunity.Sustainability;
@@ -13,6 +14,7 @@ public static class SustainabilityServiceCollectionExtensions
     public static IServiceCollection AddXperienceCommunitySustainability(this IServiceCollection services)
     {
         services.AddSingleton<ISustainabilityService, SustainabilityService>();
+        services.AddSingleton<ISustainabilityModuleInstaller, SustainabilityModuleInstaller>();
 
         return services;
     }

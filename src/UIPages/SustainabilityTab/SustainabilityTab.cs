@@ -56,9 +56,10 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
             return properties;
         }
 
-        // TODO: if report has already been ran, populate from stored data in custom module.
-
         properties.PageAvailability = PageAvailabilityStatus.Available;
+
+        properties.SustainabilityData = await _sustainabilityService.GetLastReport(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
+
         return properties;
     }
 
@@ -68,7 +69,7 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
         var webPageUrl = await _webPageUrlRetriever.Retrieve(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
         var absoluteUrl = webPageUrl.AbsoluteUrl;
 
-        var sustainabilityData = await _sustainabilityService.GetSustainabilityData(absoluteUrl);
+        var sustainabilityData = await _sustainabilityService.RunNewReport(absoluteUrl, WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
 
         return new SustainabilityResponseResult
         {
@@ -83,7 +84,7 @@ public sealed class SustainabilityTabProperties : TemplateClientProperties
 {
     public PageAvailabilityStatus PageAvailability { get; set; }
 
-    public SustainabilityResponseResult? SustainabilityData { get; set; }
+    public SustainabilityResponse? SustainabilityData { get; set; }
 }
 
 public enum PageAvailabilityStatus
