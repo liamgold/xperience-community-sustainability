@@ -1,6 +1,6 @@
-﻿using CMS.DataEngine;
+﻿using CMS.Core;
+using CMS.DataEngine;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 using System.Text.Json;
@@ -18,13 +18,13 @@ public interface ISustainabilityService
 public class SustainabilityService : ISustainabilityService
 {
     private readonly IWebHostEnvironment _env;
-    private readonly ILogger<SustainabilityService> _logger;
+    private readonly IEventLogService _eventLogService;
     private readonly IInfoProvider<SustainabilityPageDataInfo> _sustainabilityPageDataInfoProvider;
 
-    public SustainabilityService(IWebHostEnvironment env, ILogger<SustainabilityService> logger, IInfoProvider<SustainabilityPageDataInfo> sustainabilityPageDataInfoProvider)
+    public SustainabilityService(IWebHostEnvironment env, IEventLogService eventLogService, IInfoProvider<SustainabilityPageDataInfo> sustainabilityPageDataInfoProvider)
     {
         _env = env;
-        _logger = logger;
+        _eventLogService = eventLogService;
         _sustainabilityPageDataInfoProvider = sustainabilityPageDataInfoProvider;
     }
 
@@ -32,6 +32,10 @@ public class SustainabilityService : ISustainabilityService
     {
         var uri = new Uri(url);
         var baseUrl = uri.GetLeftPart(UriPartial.Authority);
+        var scriptUrl = $"{baseUrl}/_content/XperienceCommunity.Sustainability/scripts/resource-checker.js";
+
+        _eventLogService.LogInformation(nameof(SustainabilityService), nameof(RunNewReport),
+            $"RunNewReport called with requestedUrl: {url}, baseUrl: {baseUrl}, scriptUrl: {scriptUrl}");
 
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await playwright.Chromium.LaunchAsync(new() { Headless = true });
@@ -39,65 +43,58 @@ public class SustainabilityService : ISustainabilityService
         var context = await browser.NewContextAsync();
         var page = await context.NewPageAsync();
 
-        page.Console += (_, msg) =>
-        {
-            if (_env.IsDevelopment())
-            {
-                _logger.LogInformation("[Browser Console] {Type}: {Text}", msg.Type, msg.Text);
-            }
-            else
-            {
-                if (msg.Type == "error" || msg.Type == "warning")
-                {
-                    _logger.LogWarning("[Browser Console] {Type}: {Text}", msg.Type, msg.Text);
-                }
-            }
-        };
-
         await page.GotoAsync(url, new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
 
-        await page.EvaluateAsync($@"() => {{  
-            import('{baseUrl}/_content/XperienceCommunity.Sustainability/scripts/resource-checker.js')  
-                .then(m => m.reportEmissions?.())  
-                .catch(e => console.error('reportEmissions failed', e));  
-        }}");
-
-        var locator = page.Locator("[data-testid='sustainabilityData']");
-        await locator.WaitForAsync(new() { Timeout = 60000, State = WaitForSelectorState.Visible });
-
-        var dataJson = await locator.TextContentAsync();
-
-        if (string.IsNullOrWhiteSpace(dataJson))
+        try
         {
-            _logger.LogWarning("No sustainability data found on the page.");
+            await page.EvaluateAsync($@"() => {{  
+                import('{scriptUrl}')  
+                    .then(m => m.reportEmissions?.())  
+                    .catch(e => console.error('reportEmissions failed', e));  
+            }}");
+
+            var locator = page.Locator("[data-testid='sustainabilityData']");
+            await locator.WaitForAsync(new() { Timeout = 60000, State = WaitForSelectorState.Visible });
+
+            var dataJson = await locator.TextContentAsync();
+
+            if (string.IsNullOrWhiteSpace(dataJson))
+            {
+                return null;
+            }
+
+            var sustainabilityData = JsonSerializer.Deserialize<SustainabilityData>(dataJson);
+            if (sustainabilityData?.resources == null)
+            {
+                return null;
+            }
+
+            var resourceGroups = Enum.GetValues<ResourceGroupType>()
+                .Select(type => GetExternalResourceGroup(type, sustainabilityData.resources))
+                .ToList();
+
+            var sustainabilityResponse = new SustainabilityResponse(DateTime.UtcNow)
+            {
+                TotalSize = (sustainabilityData.pageWeight ?? 0) / 1024m,
+                TotalEmissions = sustainabilityData.emissions?.co2 ?? 0,
+                CarbonRating = sustainabilityData.carbonRating,
+                ResourceGroups = resourceGroups,
+            };
+
+            await LogSustainabilityResponse(sustainabilityResponse, webPageItemID, languageName);
+
+            return sustainabilityResponse;
+        }
+        catch (TimeoutException ex)
+        {
+            _eventLogService.LogError(nameof(SustainabilityService), nameof(RunNewReport),
+                $"Timeout occurred while waiting for sustainability data: {ex.Message}");
             return null;
         }
-
-        var sustainabilityData = JsonSerializer.Deserialize<SustainabilityData>(dataJson);
-
-        if (sustainabilityData?.resources == null)
+        finally
         {
-            _logger.LogWarning("Sustainability data resources are null.");
-            return null;
+            await browser.CloseAsync();
         }
-
-        var resourceGroups = Enum.GetValues<ResourceGroupType>()
-            .Select(type => GetExternalResourceGroup(type, sustainabilityData.resources))
-            .ToList();
-
-        await browser.CloseAsync();
-
-        var sustainabilityResponse = new SustainabilityResponse(DateTime.UtcNow)
-        {
-            TotalSize = (sustainabilityData.pageWeight ?? 0) / 1024m,
-            TotalEmissions = sustainabilityData.emissions?.co2 ?? 0,
-            CarbonRating = sustainabilityData.carbonRating,
-            ResourceGroups = resourceGroups,
-        };
-
-        await LogSustainabilityResponse(sustainabilityResponse, webPageItemID, languageName);
-
-        return sustainabilityResponse;
     }
 
     public async Task<SustainabilityResponse?> GetLastReport(int webPageItemID, string languageName)
