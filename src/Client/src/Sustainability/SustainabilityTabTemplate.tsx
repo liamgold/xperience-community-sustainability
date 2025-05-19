@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePageCommand } from "@kentico/xperience-admin-base";
 
@@ -64,6 +65,7 @@ const Commands = {
 export const SustainabilityTabTemplate = (
   props: SustainabilityTabTemplateProps | null
 ) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<SustainabilityData | undefined | null>(
     props?.sustainabilityData
   );
@@ -73,6 +75,7 @@ export const SustainabilityTabTemplate = (
     {
       after: (response) => {
         setData(response?.sustainabilityData);
+        setIsLoading(false);
       },
     }
   );
@@ -98,7 +101,14 @@ export const SustainabilityTabTemplate = (
                     We haven't retrieved any sustainability data for this page
                     yet.
                   </p>
-                  <Button onClick={() => submit()}>
+                  <Button
+                    disabled={isLoading}
+                    onClick={() => {
+                      setIsLoading(true);
+                      submit();
+                    }}
+                  >
+                    {isLoading && <Loader2 className="animate-spin" />}
                     Run Sustainability Report
                   </Button>
                 </>
@@ -160,9 +170,14 @@ export const SustainabilityTabTemplate = (
             </CardHeader>
             <CardContent>
               <Button
-                onClick={() => submit()}
+                disabled={isLoading}
+                onClick={() => {
+                  setIsLoading(true);
+                  submit();
+                }}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 w-full"
               >
+                {isLoading && <Loader2 className="animate-spin" />}
                 Run again
               </Button>
             </CardContent>
