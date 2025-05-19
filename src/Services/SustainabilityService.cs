@@ -40,7 +40,10 @@ public class SustainabilityService : ISustainabilityService
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await playwright.Chromium.LaunchAsync(new() { Headless = true });
 
-        var context = await browser.NewContextAsync();
+        var context = await browser.NewContextAsync(new()
+        {
+            BypassCSP = true
+        });
         var page = await context.NewPageAsync();
 
         await page.GotoAsync(url, new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
