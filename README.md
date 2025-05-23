@@ -2,8 +2,9 @@
 
 ## Description
 
-A community-driven package for Xperience by Kentico, offering sustainability impact checking for pages.
-Adapted from the [Umbraco.Community.Sustainability](https://github.com/umbraco-community/Umbraco.Community.Sustainability) project and extended for the Kentico ecosystem.
+A community-driven open-source package that brings sustainability insights and audits to [Xperience by Kentico](https://www.kentico.com/), inspired by the brilliant work of the [Umbraco Community Sustainability Team](https://umbraco.com/blog/meet-the-friendly-and-green-community-sustainability-team-of-20252026/), and the [Umbraco.Community.Sustainability](https://github.com/umbraco-community/Umbraco.Community.Sustainability) package. 🌿
+
+> For more details about this package, check out [Bringing Sustainability Insights to Xperience by Kentico](https://www.goldfinch.me/blog/bringing-sustainability-insights-to-xperience-by-kentico) which provides more background information around the package and its origin.
 
 ## Screenshots
 
@@ -57,5 +58,3 @@ Feel free to submit issues or pull requests to the repository, this is a communi
 ## License
 
 Distributed under the MIT License. See [`LICENSE.md`](LICENSE.md) for more information.
-
-It reuses portions of the [Umbraco.Community.Sustainability](https://github.com/umbraco-community/Umbraco.Community.Sustainability) project by Rick Butterfield, Thomas Morris, and contributors, adapted for use with Xperience by Kentico.
