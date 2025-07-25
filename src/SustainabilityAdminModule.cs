@@ -78,7 +78,7 @@ internal class SustainabilityAdminModule : AdminModule
     {
         if (env.ContentRootPath.StartsWith(@"\\"))
         {
-            var configuredPath = config["Playwright:BrowserPath"];
+            var configuredPath = config["Sustainability:PlaywrightBrowserPath"];
 
             if (string.IsNullOrWhiteSpace(configuredPath))
             {
