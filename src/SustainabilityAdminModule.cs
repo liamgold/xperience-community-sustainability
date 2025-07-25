@@ -23,20 +23,27 @@ internal class SustainabilityAdminModule : AdminModule
         RegisterClientModule("sustainability", "web-admin");
 
         var services = parameters.Services;
-
         var env = services.GetRequiredService<IWebHostEnvironment>();
+        var log = services.GetRequiredService<IEventLogService>();
 
         var playwrightPath = Path.Combine(env.ContentRootPath, "App_Data", "playwright");
 
-        EnsureChromiumInstalled(playwrightPath);
+        try
+        {
+
+            EnsureChromiumInstalled(playwrightPath);
+            log.LogInformation(nameof(SustainabilityAdminModule), nameof(OnInit), "Playwright installed successfully.");
+        }
+        catch (Exception ex)
+        {
+            log.LogException(nameof(SustainabilityAdminModule), nameof(OnInit), ex);
+        }
     }
 
     public static void EnsureChromiumInstalled(string installPath)
     {
         var browserInstallPath = Path.Combine(installPath, "ms-playwright");
         var workingDir = Path.Combine(installPath, "cwd");
-
-        Environment.SetEnvironmentVariable("PLAYWRIGHT_BROWSERS_PATH", browserInstallPath);
 
         Directory.CreateDirectory(browserInstallPath);
         Directory.CreateDirectory(workingDir);
@@ -46,6 +53,8 @@ internal class SustainabilityAdminModule : AdminModule
         try
         {
             Directory.SetCurrentDirectory(workingDir);
+
+            Environment.SetEnvironmentVariable("PLAYWRIGHT_BROWSERS_PATH", browserInstallPath);
 
             var exitCode = Microsoft.Playwright.Program.Main(["install", "chromium"]);
             if (exitCode != 0)

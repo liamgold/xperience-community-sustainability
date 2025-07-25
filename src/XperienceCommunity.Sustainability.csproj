@@ -11,7 +11,7 @@
 	<PropertyGroup>
 		<Title>Xperience by Kentico Sustainability</Title>
 		<PackageId>XperienceCommunity.Sustainability</PackageId>
-		<Version>1.2.3</Version>
+		<Version>1.2.4</Version>
 		<Authors>Liam Goldfinch</Authors>
 		<Company>Liam Goldfinch</Company>
 		<PackageIcon>icon.png</PackageIcon>
