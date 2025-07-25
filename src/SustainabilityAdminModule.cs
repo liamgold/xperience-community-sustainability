@@ -26,7 +26,7 @@ internal class SustainabilityAdminModule : AdminModule
         var env = services.GetRequiredService<IWebHostEnvironment>();
         var log = services.GetRequiredService<IEventLogService>();
 
-        var playwrightPath = Path.Combine(env.ContentRootPath, "App_Data", "playwright");
+        var playwrightPath = GetPlaywrightPath(env, log);
 
         try
         {
@@ -42,7 +42,7 @@ internal class SustainabilityAdminModule : AdminModule
         }
     }
 
-    public static void EnsureChromiumInstalled(string installPath, IEventLogService log)
+    private static void EnsureChromiumInstalled(string installPath, IEventLogService log)
     {
         var browserInstallPath = Path.Combine(installPath, "ms-playwright");
         var workingDir = Path.Combine(installPath, "cwd");
@@ -69,6 +69,26 @@ internal class SustainabilityAdminModule : AdminModule
         finally
         {
             Directory.SetCurrentDirectory(originalCwd);
+        }
+    }
+
+    private static string GetPlaywrightPath(IWebHostEnvironment env, IEventLogService log)
+    {
+        if (env.ContentRootPath.StartsWith(@"\\"))
+        {
+            var tempPath = Path.Combine(Path.GetTempPath(), "playwright");
+
+            log.LogInformation(nameof(SustainabilityAdminModule), nameof(GetPlaywrightPath), $"UNC path detected. Falling back to temp path: {tempPath}");
+
+            return tempPath;
+        }
+        else
+        {
+            var appDataPath = Path.Combine(env.ContentRootPath, "App_Data", "playwright");
+
+            log.LogInformation(nameof(SustainabilityAdminModule), nameof(GetPlaywrightPath), $"Using App_Data path for Playwright: {appDataPath}");
+
+            return appDataPath;
         }
     }
 }
