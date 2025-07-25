@@ -63,7 +63,7 @@ builder.Services.AddLocalization()
 builder.Services.AddDancingGoatServices();
 builder.Services.AddSingleton<IEmailActivityTrackingEvaluator, EmailActivityTrackingEvaluator>();
 
-builder.Services.AddXperienceCommunitySustainability();
+builder.Services.AddXperienceCommunitySustainability(builder.Configuration);
 
 ConfigureMembershipServices(builder.Services);
 
