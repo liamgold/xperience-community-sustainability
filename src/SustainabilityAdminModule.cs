@@ -1,6 +1,7 @@
 ﻿using CMS.Core;
 using Kentico.Xperience.Admin.Base;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using XperienceCommunity.Sustainability;
 using Path = System.IO.Path;
@@ -24,12 +25,13 @@ internal class SustainabilityAdminModule : AdminModule
 
         var services = parameters.Services;
         var env = services.GetRequiredService<IWebHostEnvironment>();
+        var config = services.GetRequiredService<IConfiguration>();
         var log = services.GetRequiredService<IEventLogService>();
-
-        var playwrightPath = GetPlaywrightPath(env, log);
 
         try
         {
+            var playwrightPath = GetPlaywrightPath(env, config, log);
+
             log.LogInformation(nameof(SustainabilityAdminModule), nameof(OnInit), $"Preparing to install Playwright to: {playwrightPath}");
 
             EnsureChromiumInstalled(playwrightPath, log);
@@ -72,15 +74,24 @@ internal class SustainabilityAdminModule : AdminModule
         }
     }
 
-    private static string GetPlaywrightPath(IWebHostEnvironment env, IEventLogService log)
+    private static string GetPlaywrightPath(IWebHostEnvironment env, IConfiguration config, IEventLogService log)
     {
         if (env.ContentRootPath.StartsWith(@"\\"))
         {
-            var tempPath = Path.Combine(Path.GetTempPath(), "playwright");
+            var configuredPath = config["Playwright:BrowserPath"];
 
-            log.LogInformation(nameof(SustainabilityAdminModule), nameof(GetPlaywrightPath), $"UNC path detected. Falling back to temp path: {tempPath}");
+            if (string.IsNullOrWhiteSpace(configuredPath))
+            {
+                var message = "UNC path detected, but no 'Playwright:BrowserPath' configured in appsettings.json.";
 
-            return tempPath;
+                log.LogError(nameof(SustainabilityAdminModule), nameof(GetPlaywrightPath), message);
+
+                throw new InvalidOperationException(message);
+            }
+
+            log.LogInformation(nameof(SustainabilityAdminModule), nameof(GetPlaywrightPath), $"UNC path detected. Using configured browser path from settings: {configuredPath}");
+
+            return configuredPath;
         }
         else
         {
