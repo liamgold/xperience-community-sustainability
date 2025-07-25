@@ -30,8 +30,10 @@ internal class SustainabilityAdminModule : AdminModule
 
         try
         {
+            log.LogInformation(nameof(SustainabilityAdminModule), nameof(OnInit), $"Preparing to install Playwright to: {playwrightPath}");
 
-            EnsureChromiumInstalled(playwrightPath);
+            EnsureChromiumInstalled(playwrightPath, log);
+
             log.LogInformation(nameof(SustainabilityAdminModule), nameof(OnInit), "Playwright installed successfully.");
         }
         catch (Exception ex)
@@ -40,10 +42,12 @@ internal class SustainabilityAdminModule : AdminModule
         }
     }
 
-    public static void EnsureChromiumInstalled(string installPath)
+    public static void EnsureChromiumInstalled(string installPath, IEventLogService log)
     {
         var browserInstallPath = Path.Combine(installPath, "ms-playwright");
         var workingDir = Path.Combine(installPath, "cwd");
+
+        log.LogInformation(nameof(SustainabilityAdminModule), nameof(EnsureChromiumInstalled), $"Browser install path: {browserInstallPath}, Working directory: {workingDir}");
 
         Directory.CreateDirectory(browserInstallPath);
         Directory.CreateDirectory(workingDir);
