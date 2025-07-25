@@ -416,3 +416,4 @@ FodyWeavers.xsd
 .idea/usage.statistics.xml
 .idea/dictionaries/
 .idea/shelf/
+/examples/DancingGoat/App_Data/playwright
