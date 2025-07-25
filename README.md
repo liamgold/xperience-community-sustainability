@@ -48,8 +48,28 @@ dotnet add package XperienceCommunity.Sustainability
 
    // ...
 
-   builder.Services.AddXperienceCommunitySustainability();
+   builder.Services.AddXperienceCommunitySustainability(builder.Configuration);
    ```
+
+## Configuration
+
+The package can be configured using the `Sustainability` section in your `appsettings.json` file.
+
+```json
+{
+  "Sustainability": {
+    "PlaywrightBrowserPath": "/custom/path/to/playwright/browsers"
+  }
+}
+```
+
+### Configuration Options
+
+| Option | Description | Default |
+| ------ | ----------- | ------- |
+| `PlaywrightBrowserPath` | Custom path where Playwright browsers should be installed. **Only used when hosting on UNC paths (network shares)** - ignored for standard hosting scenarios. | `null` |
+
+> **Note**: This setting is **only relevant for UNC hosting** (network shares starting with `\\`). For standard hosting, browsers are automatically installed in the `App_Data/playwright` directory and this setting is ignored. When hosting on UNC paths, you **must** configure this setting or the Sustainability functionality will not work (the error will be logged in the Kentico event log, but the website will still start successfully).
 
 ## Contributing
 

@@ -1,9 +1,10 @@
 ﻿using CMS.Core;
 using Kentico.Xperience.Admin.Base;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using XperienceCommunity.Sustainability;
+using XperienceCommunity.Sustainability.Models;
 using Path = System.IO.Path;
 
 [assembly: CMS.RegisterModule(typeof(SustainabilityAdminModule))]
@@ -25,12 +26,12 @@ internal class SustainabilityAdminModule : AdminModule
 
         var services = parameters.Services;
         var env = services.GetRequiredService<IWebHostEnvironment>();
-        var config = services.GetRequiredService<IConfiguration>();
         var log = services.GetRequiredService<IEventLogService>();
+        var sustainabilityOptions = services.GetRequiredService<IOptions<SustainabilityOptions>>().Value;
 
         try
         {
-            var playwrightPath = GetPlaywrightPath(env, config, log);
+            var playwrightPath = GetPlaywrightPath(env, sustainabilityOptions, log);
 
             log.LogInformation(nameof(SustainabilityAdminModule), nameof(OnInit), $"Preparing to install Playwright to: {playwrightPath}");
 
@@ -65,6 +66,7 @@ internal class SustainabilityAdminModule : AdminModule
             var exitCode = Microsoft.Playwright.Program.Main(["install", "chromium"]);
             if (exitCode != 0)
             {
+                log.LogError(nameof(SustainabilityAdminModule), nameof(EnsureChromiumInstalled), $"Playwright install failed with exit code {exitCode}");
                 throw new Exception($"Playwright exited with code {exitCode}");
             }
         }
@@ -74,15 +76,15 @@ internal class SustainabilityAdminModule : AdminModule
         }
     }
 
-    private static string GetPlaywrightPath(IWebHostEnvironment env, IConfiguration config, IEventLogService log)
+    private static string GetPlaywrightPath(IWebHostEnvironment env, SustainabilityOptions? options, IEventLogService log)
     {
         if (env.ContentRootPath.StartsWith(@"\\"))
         {
-            var configuredPath = config["Sustainability:PlaywrightBrowserPath"];
+            var configuredPath = options?.PlaywrightBrowserPath;
 
             if (string.IsNullOrWhiteSpace(configuredPath))
             {
-                var message = "UNC path detected, but no 'Playwright:BrowserPath' configured in appsettings.json.";
+                var message = "UNC path detected, but no 'Sustainability:PlaywrightBrowserPath' configured in appsettings.json.";
 
                 log.LogError(nameof(SustainabilityAdminModule), nameof(GetPlaywrightPath), message);
 
