@@ -7,14 +7,15 @@ This document describes how to publish a new version to NuGet.
 1. **Configure Trusted Publishing on NuGet.org** (one-time setup):
    - Go to: https://www.nuget.org/account/Packages
    - Find package: `XperienceCommunity.Sustainability`
-   - Click "Manage" → "Trusted publishers"
-   - Click "Add trusted publisher"
-   - Set:
-     - **Owner**: `liamgold`
+   - Click "Manage" → "Trusted publishers" → "Add trusted publisher"
+   - Fill in the form:
+     - **Policy Name**: Any name (e.g., "GitHub Actions Auto-Publish")
+     - **Package Owner**: `liamgold` (should be pre-selected)
+     - **Repository Owner**: `liamgold`
      - **Repository**: `xperience-community-sustainability`
-     - **Workflow**: `publish.yml`
-     - **Environment**: (leave blank for no environment restriction)
-   - Save
+     - **Workflow File**: `publish.yml`
+     - **Environment**: (leave blank)
+   - Click "Create"
 
    This allows GitHub Actions to publish without API keys!
 
