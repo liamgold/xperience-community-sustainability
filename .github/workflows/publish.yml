@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   publish:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -30,4 +30,4 @@ jobs:
       run: dotnet pack src/XperienceCommunity.Sustainability.csproj --configuration Release --no-build --output nupkg
 
     - name: Publish to NuGet using Trusted Publishing
-      run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
