@@ -30,4 +30,6 @@ jobs:
       run: dotnet pack src/XperienceCommunity.Sustainability.csproj --configuration Release --no-build --output nupkg
 
     - name: Publish to NuGet using Trusted Publishing
-      run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: |
+        cd nupkg
+        dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
