@@ -71,6 +71,11 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
 
         var sustainabilityData = await _sustainabilityService.RunNewReport(absoluteUrl, WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
 
+        if (sustainabilityData == null)
+        {
+            throw new InvalidOperationException("Failed to generate sustainability report. Check the event log for details.");
+        }
+
         return new SustainabilityResponseResult
         {
             SustainabilityData = sustainabilityData,

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace XperienceCommunity.Sustainability.Models;
 
@@ -9,19 +9,19 @@ public class SustainabilityResponse
         DateCreated = dateCreated;
     }
 
-    [JsonProperty("lastRunDate")]
+    [JsonPropertyName("lastRunDate")]
     public string LastRunDate => DateCreated.ToString("MMMM dd, yyyy h:mm tt");
 
-    [JsonProperty("totalSize")]
+    [JsonPropertyName("totalSize")]
     public decimal TotalSize { get; set; } = 0;
 
-    [JsonProperty("totalEmissions")]
+    [JsonPropertyName("totalEmissions")]
     public double TotalEmissions { get; set; } = 0;
 
-    [JsonProperty("carbonRating")]
+    [JsonPropertyName("carbonRating")]
     public string? CarbonRating { get; set; }
 
-    [JsonProperty("resourceGroups")]
+    [JsonPropertyName("resourceGroups")]
     public List<ExternalResourceGroup>? ResourceGroups { get; set; }
 
     [JsonIgnore]

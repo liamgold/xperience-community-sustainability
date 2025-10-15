@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace XperienceCommunity.Sustainability.Models;
 
 public class ExternalResource
 {
-    [JsonProperty("url")]
+    [JsonPropertyName("url")]
     public string? Url { get; set; }
 
-    [JsonProperty("size")]
+    [JsonPropertyName("size")]
     public decimal? Size { get; set; } = 0;
 
     public ExternalResource() { }

@@ -66,6 +66,7 @@ export const SustainabilityTabTemplate = (
   props: SustainabilityTabTemplateProps | null
 ) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<SustainabilityData | undefined | null>(
     props?.sustainabilityData
   );
@@ -76,6 +77,12 @@ export const SustainabilityTabTemplate = (
       after: (response) => {
         setData(response?.sustainabilityData);
         setIsLoading(false);
+        setError(null);
+      },
+      onError: (err) => {
+        setIsLoading(false);
+        setError("Failed to run sustainability report. Please try again.");
+        console.error("Sustainability report error:", err);
       },
     }
   );
@@ -101,10 +108,16 @@ export const SustainabilityTabTemplate = (
                     We haven't retrieved any sustainability data for this page
                     yet.
                   </p>
+                  {error && (
+                    <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">
+                      {error}
+                    </div>
+                  )}
                   <Button
                     disabled={isLoading}
                     onClick={() => {
                       setIsLoading(true);
+                      setError(null);
                       submit();
                     }}
                   >
@@ -168,11 +181,17 @@ export const SustainabilityTabTemplate = (
               <CardTitle>Sustainability report</CardTitle>
               <CardDescription>Last tested: {data.lastRunDate}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
+              {error && (
+                <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">
+                  {error}
+                </div>
+              )}
               <Button
                 disabled={isLoading}
                 onClick={() => {
                   setIsLoading(true);
+                  setError(null);
                   submit();
                 }}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 w-full"

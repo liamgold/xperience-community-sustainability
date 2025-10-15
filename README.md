@@ -37,7 +37,7 @@ dotnet add package XperienceCommunity.Sustainability
 
 1. Install NuGet package above.
 
-1. Register the Sustainability services using `builder.Services.AddXperienceCommunitySustainability()`:
+2. Register the Sustainability services using `builder.Services.AddXperienceCommunitySustainability()`:
 
    ```csharp
    // Program.cs
@@ -51,6 +51,10 @@ dotnet add package XperienceCommunity.Sustainability
    builder.Services.AddXperienceCommunitySustainability(builder.Configuration);
    ```
 
+3. The Sustainability tab will automatically appear on content pages in the Xperience admin interface.
+
+> **Note**: Playwright browsers (Chromium) are automatically installed on first application startup. The installation path defaults to `App_Data/playwright` unless you're hosting on a UNC path.
+
 ## Configuration
 
 The package can be configured using the `Sustainability` section in your `appsettings.json` file.
@@ -58,6 +62,7 @@ The package can be configured using the `Sustainability` section in your `appset
 ```json
 {
   "Sustainability": {
+    "TimeoutMilliseconds": 60000,
     "PlaywrightBrowserPath": "/custom/path/to/playwright/browsers"
   }
 }
@@ -67,9 +72,10 @@ The package can be configured using the `Sustainability` section in your `appset
 
 | Option | Description | Default |
 | ------ | ----------- | ------- |
-| `PlaywrightBrowserPath` | Custom path where Playwright browsers should be installed. **Only used when hosting on UNC paths (network shares)** - ignored for standard hosting scenarios. | `null` |
+| `TimeoutMilliseconds` | Timeout in milliseconds for waiting for sustainability data to be collected from the page. | `60000` (60 seconds) |
+| `PlaywrightBrowserPath` | Custom path where Playwright browsers should be installed. **Only required when hosting on UNC paths (network shares starting with `\\`)**. For standard hosting, browsers are automatically installed in `App_Data/playwright`. | `null` |
 
-> **Note**: This setting is **only relevant for UNC hosting** (network shares starting with `\\`). For standard hosting, browsers are automatically installed in the `App_Data/playwright` directory and this setting is ignored. When hosting on UNC paths, you **must** configure this setting or the Sustainability functionality will not work (the error will be logged in the Kentico event log, but the website will still start successfully).
+> **Note on UNC Hosting**: When hosting on UNC paths (network shares), you **must** configure `PlaywrightBrowserPath` or the application will throw an error during startup. This setting is ignored for standard hosting scenarios.
 
 ## Contributing
 
