@@ -44,7 +44,13 @@ async function getEmissionsData() {
 }
 
 function getResources() {
-    return window.performance.getEntriesByType("resource");
+    const allResources = window.performance.getEntriesByType("resource");
+    // Filter out the resource-checker.js script itself and its dependencies (skypack CDN)
+    // to avoid artificially inflating page weight calculations
+    return allResources.filter(resource => {
+        const url = resource.name || '';
+        return !url.includes('resource-checker.js') && !url.includes('cdn.skypack.dev');
+    });
 }
 
 function getTransferSize(resources) {
