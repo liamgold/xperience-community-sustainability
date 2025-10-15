@@ -17,7 +17,7 @@ public static class SustainabilityServiceCollectionExtensions
     {
         services.Configure<SustainabilityOptions>(configuration.GetSection("Sustainability"));
 
-        services.AddSingleton<ISustainabilityService, SustainabilityService>();
+        services.AddScoped<ISustainabilityService, SustainabilityService>();
         services.AddSingleton<ISustainabilityModuleInstaller, SustainabilityModuleInstaller>();
 
         return services;

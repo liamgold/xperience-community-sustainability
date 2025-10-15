@@ -1,22 +1,39 @@
-﻿namespace XperienceCommunity.Sustainability.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace XperienceCommunity.Sustainability.Models;
 
 public record SustainabilityData
 {
-    public int? pageWeight { get; set; }
-    public string? carbonRating { get; set; }
-    public Emissions? emissions { get; set; }
-    public Resource[]? resources { get; set; }
+    [JsonPropertyName("pageWeight")]
+    public int? PageWeight { get; set; }
+
+    [JsonPropertyName("carbonRating")]
+    public string? CarbonRating { get; set; }
+
+    [JsonPropertyName("emissions")]
+    public Emissions? Emissions { get; set; }
+
+    [JsonPropertyName("resources")]
+    public Resource[]? Resources { get; set; }
 }
 
 public record Emissions
 {
-    public double? co2 { get; set; }
-    public bool green { get; set; }
+    [JsonPropertyName("co2")]
+    public double? Co2 { get; set; }
+
+    [JsonPropertyName("green")]
+    public bool Green { get; set; }
 }
 
 public record Resource
 {
-    public string? name { get; set; }
-    public string? initiatorType { get; set; }
-    public int? transferSize { get; set; }
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    [JsonPropertyName("initiatorType")]
+    public string? InitiatorType { get; set; }
+
+    [JsonPropertyName("transferSize")]
+    public int? TransferSize { get; set; }
 }

@@ -7,10 +7,10 @@ public static class EnumExtensions
 {
     public static string? GetDisplayName(this Enum enumValue)
     {
-        return enumValue.GetType()
-          .GetMember(enumValue.ToString())
-          .First()
-          .GetCustomAttribute<DisplayAttribute>()
-          ?.GetName();
+        var memberInfo = enumValue.GetType()
+            .GetMember(enumValue.ToString())
+            .FirstOrDefault();
+
+        return memberInfo?.GetCustomAttribute<DisplayAttribute>()?.GetName();
     }
 }

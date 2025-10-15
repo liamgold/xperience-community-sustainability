@@ -417,3 +417,6 @@ FodyWeavers.xsd
 .idea/dictionaries/
 .idea/shelf/
 /examples/DancingGoat/App_Data/playwright
+
+# Claude Code
+.claude/

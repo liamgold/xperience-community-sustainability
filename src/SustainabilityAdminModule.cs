@@ -95,13 +95,11 @@ internal class SustainabilityAdminModule : AdminModule
 
             return configuredPath;
         }
-        else
-        {
-            var appDataPath = Path.Combine(env.ContentRootPath, "App_Data", "playwright");
 
-            log.LogInformation(nameof(SustainabilityAdminModule), nameof(GetPlaywrightPath), $"Using App_Data path for Playwright: {appDataPath}");
+        var appDataPath = Path.Combine(env.ContentRootPath, "App_Data", "playwright");
 
-            return appDataPath;
-        }
+        log.LogInformation(nameof(SustainabilityAdminModule), nameof(GetPlaywrightPath), $"Using App_Data path for Playwright: {appDataPath}");
+
+        return appDataPath;
     }
 }

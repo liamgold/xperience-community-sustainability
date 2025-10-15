@@ -1,21 +1,21 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using XperienceCommunity.Sustainability.Extensions;
 
 namespace XperienceCommunity.Sustainability.Models;
 
 public class ExternalResourceGroup
 {
-    [JsonProperty("type")]
+    [JsonPropertyName("type")]
     public ResourceGroupType Type { get; set; }
 
-    [JsonProperty("name")]
+    [JsonPropertyName("name")]
     public string? Name { get; set; }
 
-    [JsonProperty("totalSize")]
+    [JsonPropertyName("totalSize")]
     public decimal TotalSize { get; set; } = 0;
 
-    [JsonProperty("resources")]
+    [JsonPropertyName("resources")]
     public List<ExternalResource>? Resources { get; set; } = new List<ExternalResource>();
 
     public ExternalResourceGroup() { }
