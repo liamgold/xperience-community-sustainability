@@ -4,11 +4,19 @@ This document describes how to publish a new version to NuGet.
 
 ## Prerequisites
 
-1. **NuGet API Key**: Add your NuGet API key to GitHub Secrets
-   - Go to: https://github.com/liamgold/xperience-community-sustainability/settings/secrets/actions
-   - Click "New repository secret"
-   - Name: `NUGET_API_KEY`
-   - Value: Your NuGet API key from https://www.nuget.org/account/apikeys
+1. **Configure Trusted Publishing on NuGet.org** (one-time setup):
+   - Go to: https://www.nuget.org/account/Packages
+   - Find package: `XperienceCommunity.Sustainability`
+   - Click "Manage" → "Trusted publishers"
+   - Click "Add trusted publisher"
+   - Set:
+     - **Owner**: `liamgold`
+     - **Repository**: `xperience-community-sustainability`
+     - **Workflow**: `publish.yml`
+     - **Environment**: (leave blank for no environment restriction)
+   - Save
+
+   This allows GitHub Actions to publish without API keys!
 
 ## Publishing a New Version
 
@@ -25,13 +33,7 @@ git commit -m "Bump version to 2.1.0"
 git push origin main
 ```
 
-### 3. Create a Git Tag
-```bash
-git tag v2.1.0
-git push origin v2.1.0
-```
-
-### 4. Create GitHub Release
+### 3. Create GitHub Release (creates tag automatically)
 1. Go to: https://github.com/liamgold/xperience-community-sustainability/releases/new
 2. Choose tag: `v2.1.0`
 3. Release title: `v2.1.0`
@@ -64,8 +66,9 @@ Follow [Semantic Versioning](https://semver.org/):
 ### "Package already exists" error
 The workflow includes `--skip-duplicate` to handle this gracefully.
 
-### Workflow fails to authenticate
-Check that `NUGET_API_KEY` secret is set correctly in GitHub Settings.
+### "Authentication failed" or "403 Forbidden"
+Make sure Trusted Publishing is configured correctly on NuGet.org (see Prerequisites above).
+Verify the owner, repository, and workflow name exactly match.
 
 ### Want to publish manually?
 ```bash
