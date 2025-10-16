@@ -182,18 +182,9 @@ const resourceGroupCardStyles = {
     color: "#6b7280",
     whiteSpace: "nowrap" as const,
   },
-  expandButton: {
+  expandButtonContainer: {
     marginTop: "12px",
-    padding: "8px 16px",
-    background: "transparent",
-    border: "1px solid #e5e7eb",
-    borderRadius: "6px",
-    fontSize: "13px",
-    fontWeight: 500,
-    color: "#6366f1",
-    cursor: "pointer" as const,
     width: "100%",
-    transition: "all 0.2s",
   },
 };
 
@@ -253,22 +244,14 @@ const ResourceGroupCard = ({
             );
           })}
           {group.resources.length > 3 && (
-            <button
-              onClick={() => setExpanded(!expanded)}
-              style={resourceGroupCardStyles.expandButton}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#f9fafb";
-                e.currentTarget.style.borderColor = "#6366f1";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.borderColor = "#e5e7eb";
-              }}
-            >
-              {expanded
-                ? "Show less"
-                : `Show ${group.resources.length - 3} more`}
-            </button>
+            <div style={resourceGroupCardStyles.expandButtonContainer}>
+              <Button
+                label={expanded ? "Show less" : `Show ${group.resources.length - 3} more`}
+                onClick={() => setExpanded(!expanded)}
+                color={ButtonColor.Secondary}
+                size={ButtonSize.S}
+              />
+            </div>
           )}
         </div>
       )}
