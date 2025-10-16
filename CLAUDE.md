@@ -6,7 +6,6 @@ A community-driven open-source NuGet package that brings sustainability insights
 
 **Purpose**: Allows content editors to see page weight, carbon emissions, and carbon ratings for individual web pages directly in the Xperience admin UI.
 
-**Current Version**: 2.0.0
 **License**: MIT
 **Repository**: https://github.com/liamgold/xperience-community-sustainability
 
@@ -98,16 +97,26 @@ C:\Projects\xperience-community-sustainability\
 
 ### 3. React Frontend (src/Client/src/Sustainability/SustainabilityTabTemplate.tsx)
 
-**UI States**:
-1. **No data + Available**: Shows "Run Sustainability Report" button
-2. **No data + Not Available**: Shows unavailable message (root pages/folders)
-3. **Data loaded**: Displays report with resource breakdown and carbon rating
+**UI Design**: Modern dashboard-style layout using native XbyK components and custom styled components.
 
-**Features**:
-- Loading states with spinner
-- Carbon rating colors (A+ green → F red)
-- Resource grouping by type (Images, Scripts, CSS, Links, Other)
-- "Run again" functionality
+**UI States**:
+1. **No data + Available**: Shows "Run Analysis" button in centered card
+2. **No data + Not Available**: Shows unavailable message (root pages/folders)
+3. **Data loaded**: Displays comprehensive dashboard with hero carbon rating
+
+**Key Features**:
+- **Hero Carbon Rating Section** - Large 120px rating letter with gradient background themed by rating color
+- **Stat Cards Grid** - 2x2 grid showing CO₂ Emissions, Page Weight, Resources count, and Efficiency rating
+- **Collapsible Resource Lists** - Shows 3 resources by default with "Show X more" button
+- **Resource Breakdown** - Sorted by size (largest first) with filename/path separation
+- **Percentage Badges** - Shows what % of total page weight each resource group represents
+- **Optimization Tips** - XbyK-specific features (Image Variants, AIRA) plus general web performance tips
+- **Loading states** - Built into XbyK Button component with `inProgress` prop
+- **Responsive layout** - Uses XbyK Row/Column with `colsLg`/`colsMd` breakpoints
+
+**Components Used**:
+- XbyK Native: `Card`, `Button`, `Stack`, `Row`, `Column`, `Headline`, `Spacing`
+- Custom: `StatCard`, `ResourceGroupCard` (with expand/collapse state)
 
 ### 4. JavaScript Analysis (src/wwwroot/scripts/resource-checker.js)
 
@@ -201,23 +210,9 @@ This registers:
 
 ## Known Issues & Limitations
 
-### Potential Improvements
-1. **External CDN dependency**: Skypack CDN for @tgwf/co2 (availability risk) - consider bundling locally
-2. **Commented dashboard**: Dashboard feature is commented out (line 5-12 in SustainabilityDashboard.cs) - planned for future
-3. **No automated tests**: Consider adding unit/integration tests
-
-### Recently Fixed (v2.0.0+)
-- ✓ Memory leak with Playwright disposal
-- ✓ Service lifetime (Singleton → Scoped)
-- ✓ Mixed JSON serializers (now all System.Text.Json)
-- ✓ Hardcoded timeout (now configurable)
-- ✓ Limited error handling (added comprehensive catch blocks)
-- ✓ React error states (added error UI)
-- ✓ Naming conventions (DTOs now use PascalCase)
-- ✓ Database query optimization
-- ✓ Enum extension fragility
-- ✓ Null checking for deserialization
-- ✓ Magic strings extracted to constants
+- **External CDN dependency**: Skypack CDN for @tgwf/co2 (availability risk) - see GitHub issues for planned improvements
+- **No automated tests**: Unit/integration tests needed for service and UI components
+- **Future enhancements**: See GitHub issues for planned features (global dashboard, historical trends, etc.)
 
 ## Development Workflow
 
@@ -236,23 +231,12 @@ dotnet run
 
 ### Frontend Development
 
-Client code is built separately (likely via npm/webpack - check Client folder for package.json).
-
-### Creating a Release
-
-- Version is set in `XperienceCommunity.Sustainability.csproj` (line 14)
-- `GeneratePackageOnBuild` is enabled (line 25)
-- NuGet package includes icon, README, and LICENSE
-
-## Testing Strategy
-
-**Current state**: No automated tests visible in repository.
-
-**Recommended additions**:
-- Unit tests for `SustainabilityService` (mock Playwright)
-- Integration tests for database operations
-- E2E tests for admin UI interactions
-- Tests for resource-checker.js logic
+Client code is built using webpack:
+```bash
+cd src/Client
+npm install
+npm run build
+```
 
 ## Dependencies
 
@@ -262,9 +246,9 @@ Client code is built separately (likely via npm/webpack - check Client folder fo
 - `Microsoft.Playwright` (1.52.0)
 
 ### NPM Packages (Client/)
-- React ecosystem (shadcn/ui components)
-- `@kentico/xperience-admin-base`
-- `lucide-react` (icons)
+- `@kentico/xperience-admin-base` (30.4.2) - Base admin framework
+- `@kentico/xperience-admin-components` (30.4.2) - Native XbyK UI components
+- React (18.3.1) and React DOM (18.3.1)
 
 ### External Runtime
 - `@tgwf/co2` (v0.15) via Skypack CDN
@@ -292,11 +276,6 @@ Update `ResourceGroupType` enum (ExternalResourceGroup.cs:43-55) and `GetInitiat
 2. Regenerate `SustainabilityPageDataInfo.generated.cs` (Kentico tooling)
 3. Update save/load logic in `SustainabilityService.cs`
 
-## Git Workflow
-
-**Main branch**: `main`
-**Recent work**: UNC path support for shared hosting (commits: 4f08bbd, 2c230ba, fff6239)
-
 ## Debugging Tips
 
 1. **Playwright issues**: Check event log in Kentico admin for logged errors
@@ -304,19 +283,3 @@ Update `ResourceGroupType` enum (ExternalResourceGroup.cs:43-55) and `GetInitiat
 3. **Timeout errors**: Increase timeout in SustainabilityService.cs:60 or check if page loads slowly
 4. **CSP errors**: Ensure `BypassCSP = true` is set (line 45)
 5. **Browser not found**: Playwright requires browser installation (`playwright install chromium`)
-
-## Related Resources
-
-- [Sustainable Web Design](https://sustainablewebdesign.org/digital-carbon-ratings/)
-- [The Green Web Foundation CO2.js](https://developers.thegreenwebfoundation.org/co2js/overview/)
-- [Umbraco.Community.Sustainability](https://github.com/umbraco-community/Umbraco.Community.Sustainability)
-- [Blog: Bringing Sustainability Insights to Xperience](https://www.goldfinch.me/blog/bringing-sustainability-insights-to-xperience-by-kentico)
-
-## Future Enhancements
-
-- Implement global dashboard (currently commented out)
-- Historical trend analysis
-- Bulk page scanning
-- Configurable thresholds and timeouts
-- CI/CD pipeline improvements
-- Automated testing suite
