@@ -419,4 +419,6 @@ FodyWeavers.xsd
 /examples/DancingGoat/App_Data/playwright
 
 # Claude Code
-.claude/
+.claude/*
+!.claude/commands/
+!.claude/agents/
