@@ -6,7 +6,6 @@ A community-driven open-source NuGet package that brings sustainability insights
 
 **Purpose**: Allows content editors to see page weight, carbon emissions, and carbon ratings for individual web pages directly in the Xperience admin UI.
 
-**Current Version**: 2.0.0
 **License**: MIT
 **Repository**: https://github.com/liamgold/xperience-community-sustainability
 
