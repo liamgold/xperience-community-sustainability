@@ -111,6 +111,92 @@ const StatCard = ({
   </div>
 );
 
+// Style constants for ResourceGroupCard
+const resourceGroupCardStyles = {
+  container: {
+    background: "white",
+    border: "1px solid #e5e7eb",
+    borderRadius: "8px",
+    overflow: "hidden" as const,
+  },
+  header: {
+    padding: "16px 20px",
+    background: "#f9fafb",
+    borderBottom: "1px solid #e5e7eb",
+    display: "flex",
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+  },
+  title: {
+    fontSize: "15px",
+    fontWeight: 600,
+    color: "#111827",
+  },
+  subtitle: {
+    fontSize: "13px",
+    color: "#6b7280",
+    marginTop: "2px",
+  },
+  badge: {
+    padding: "4px 12px",
+    background: "#eff6ff",
+    color: "#1e40af",
+    fontSize: "13px",
+    fontWeight: 600,
+    borderRadius: "12px",
+  },
+  listContainer: {
+    padding: "12px 20px",
+  },
+  resourceItem: (isLast: boolean) => ({
+    padding: "12px 0",
+    borderBottom: isLast ? "none" : "1px solid #f3f4f6",
+  }),
+  resourceRow: {
+    display: "flex",
+    justifyContent: "space-between" as const,
+    alignItems: "flex-start" as const,
+    gap: "12px",
+  },
+  resourceInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  fileName: {
+    fontSize: "13px",
+    fontWeight: 500,
+    color: "#111827",
+    marginBottom: "2px",
+    wordBreak: "break-word" as const,
+  },
+  filePath: {
+    fontSize: "12px",
+    color: "#9ca3af",
+    overflow: "hidden",
+    textOverflow: "ellipsis" as const,
+    whiteSpace: "nowrap" as const,
+  },
+  fileSize: {
+    fontSize: "13px",
+    fontWeight: 600,
+    color: "#6b7280",
+    whiteSpace: "nowrap" as const,
+  },
+  expandButton: {
+    marginTop: "12px",
+    padding: "8px 16px",
+    background: "transparent",
+    border: "1px solid #e5e7eb",
+    borderRadius: "6px",
+    fontSize: "13px",
+    fontWeight: 500,
+    color: "#6366f1",
+    cursor: "pointer" as const,
+    width: "100%",
+    transition: "all 0.2s",
+  },
+};
+
 const ResourceGroupCard = ({
   group,
   totalPageSize
@@ -122,106 +208,44 @@ const ResourceGroupCard = ({
   const displayCount = expanded ? group.resources.length : 3;
 
   return (
-    <div
-      style={{
-        background: "white",
-        border: "1px solid #e5e7eb",
-        borderRadius: "8px",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          padding: "16px 20px",
-          background: "#f9fafb",
-          borderBottom: "1px solid #e5e7eb",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+    <div style={resourceGroupCardStyles.container}>
+      <div style={resourceGroupCardStyles.header}>
         <div>
-          <div style={{ fontSize: "15px", fontWeight: 600, color: "#111827" }}>
+          <div style={resourceGroupCardStyles.title}>
             {group.name}
           </div>
-          <div style={{ fontSize: "13px", color: "#6b7280", marginTop: "2px" }}>
+          <div style={resourceGroupCardStyles.subtitle}>
             {group.resources.length} resource
             {group.resources.length !== 1 ? "s" : ""} •{" "}
             {group.totalSize.toFixed(2)} KB
           </div>
         </div>
-        <div
-          style={{
-            padding: "4px 12px",
-            background: "#eff6ff",
-            color: "#1e40af",
-            fontSize: "13px",
-            fontWeight: 600,
-            borderRadius: "12px",
-          }}
-        >
+        <div style={resourceGroupCardStyles.badge}>
           {((group.totalSize / totalPageSize) * 100).toFixed(1)}% of page
         </div>
       </div>
       {group.resources.length > 0 && (
-        <div style={{ padding: "12px 20px" }}>
+        <div style={resourceGroupCardStyles.listContainer}>
           {group.resources.slice(0, displayCount).map((resource, idx) => {
             const fileName = resource.url.split("/").pop() || resource.url;
             const path = resource.url.substring(
               0,
               resource.url.lastIndexOf("/") + 1
             );
+            const isLast = idx === displayCount - 1;
 
             return (
-              <div
-                key={idx}
-                style={{
-                  padding: "12px 0",
-                  borderBottom:
-                    idx < displayCount - 1 ? "1px solid #f3f4f6" : "none",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: "12px",
-                  }}
-                >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: 500,
-                        color: "#111827",
-                        marginBottom: "2px",
-                        wordBreak: "break-word",
-                      }}
-                    >
+              <div key={idx} style={resourceGroupCardStyles.resourceItem(isLast)}>
+                <div style={resourceGroupCardStyles.resourceRow}>
+                  <div style={resourceGroupCardStyles.resourceInfo}>
+                    <div style={resourceGroupCardStyles.fileName}>
                       {fileName}
                     </div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#9ca3af",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                      title={path}
-                    >
+                    <div style={resourceGroupCardStyles.filePath} title={path}>
                       {path}
                     </div>
                   </div>
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      color: "#6b7280",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                  <div style={resourceGroupCardStyles.fileSize}>
                     {resource.size.toFixed(2)} KB
                   </div>
                 </div>
@@ -231,19 +255,7 @@ const ResourceGroupCard = ({
           {group.resources.length > 3 && (
             <button
               onClick={() => setExpanded(!expanded)}
-              style={{
-                marginTop: "12px",
-                padding: "8px 16px",
-                background: "transparent",
-                border: "1px solid #e5e7eb",
-                borderRadius: "6px",
-                fontSize: "13px",
-                fontWeight: 500,
-                color: "#6366f1",
-                cursor: "pointer",
-                width: "100%",
-                transition: "all 0.2s",
-              }}
+              style={resourceGroupCardStyles.expandButton}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "#f9fafb";
                 e.currentTarget.style.borderColor = "#6366f1";
