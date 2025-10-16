@@ -185,6 +185,8 @@ const resourceGroupCardStyles = {
   expandButtonContainer: {
     marginTop: "12px",
     width: "100%",
+    display: "flex" as const,
+    justifyContent: "center" as const,
   },
 };
 
