@@ -98,16 +98,26 @@ C:\Projects\xperience-community-sustainability\
 
 ### 3. React Frontend (src/Client/src/Sustainability/SustainabilityTabTemplate.tsx)
 
-**UI States**:
-1. **No data + Available**: Shows "Run Sustainability Report" button
-2. **No data + Not Available**: Shows unavailable message (root pages/folders)
-3. **Data loaded**: Displays report with resource breakdown and carbon rating
+**UI Design**: Modern dashboard-style layout using native XbyK components and custom styled components.
 
-**Features**:
-- Loading states with spinner
-- Carbon rating colors (A+ green → F red)
-- Resource grouping by type (Images, Scripts, CSS, Links, Other)
-- "Run again" functionality
+**UI States**:
+1. **No data + Available**: Shows "Run Analysis" button in centered card
+2. **No data + Not Available**: Shows unavailable message (root pages/folders)
+3. **Data loaded**: Displays comprehensive dashboard with hero carbon rating
+
+**Key Features**:
+- **Hero Carbon Rating Section** - Large 120px rating letter with gradient background themed by rating color
+- **Stat Cards Grid** - 2x2 grid showing CO₂ Emissions, Page Weight, Resources count, and Efficiency rating
+- **Collapsible Resource Lists** - Shows 3 resources by default with "Show X more" button
+- **Resource Breakdown** - Sorted by size (largest first) with filename/path separation
+- **Percentage Badges** - Shows what % of total page weight each resource group represents
+- **Optimization Tips** - XbyK-specific features (Image Variants, AIRA) plus general web performance tips
+- **Loading states** - Built into XbyK Button component with `inProgress` prop
+- **Responsive layout** - Uses XbyK Row/Column with `colsLg`/`colsMd` breakpoints
+
+**Components Used**:
+- XbyK Native: `Card`, `Button`, `Stack`, `Row`, `Column`, `Headline`, `Spacing`
+- Custom: `StatCard`, `ResourceGroupCard` (with expand/collapse state)
 
 ### 4. JavaScript Analysis (src/wwwroot/scripts/resource-checker.js)
 
@@ -218,6 +228,10 @@ This registers:
 - ✓ Enum extension fragility
 - ✓ Null checking for deserialization
 - ✓ Magic strings extracted to constants
+- ✓ UI migration from ShadCN to native XbyK components
+- ✓ Dashboard-style redesign with hero rating section
+- ✓ Collapsible resource lists for better UX
+- ✓ XbyK-specific optimization tips (Image Variants, AIRA)
 
 ## Development Workflow
 
@@ -262,9 +276,9 @@ Client code is built separately (likely via npm/webpack - check Client folder fo
 - `Microsoft.Playwright` (1.52.0)
 
 ### NPM Packages (Client/)
-- React ecosystem (shadcn/ui components)
-- `@kentico/xperience-admin-base`
-- `lucide-react` (icons)
+- `@kentico/xperience-admin-base` (30.4.2) - Base admin framework
+- `@kentico/xperience-admin-components` (30.4.2) - Native XbyK UI components
+- React (18.3.1) and React DOM (18.3.1)
 
 ### External Runtime
 - `@tgwf/co2` (v0.15) via Skypack CDN
@@ -314,9 +328,63 @@ Update `ResourceGroupType` enum (ExternalResourceGroup.cs:43-55) and `GetInitiat
 
 ## Future Enhancements
 
-- Implement global dashboard (currently commented out)
-- Historical trend analysis
-- Bulk page scanning
-- Configurable thresholds and timeouts
-- CI/CD pipeline improvements
-- Automated testing suite
+### High Priority
+- **Global Dashboard** - Implement site-wide sustainability dashboard (currently commented out in SustainabilityDashboard.cs)
+  - Overview of all pages with their carbon ratings
+  - Site-wide statistics and trends
+  - Identify worst-performing pages
+
+- **Historical Trend Analysis** - Track sustainability improvements over time
+  - Chart showing rating changes per page
+  - Compare current vs. previous reports
+  - Visual indicators (↑ Improved, → No change, ↓ Declined)
+
+- **Progress/Comparison Feature** - Show trend indicators in page-level reports
+  - Display previous rating alongside current
+  - Percentage improvement metrics
+  - Requires database schema update to track history
+
+### Medium Priority
+- **Export/Share Functionality**
+  - Export report as PDF for stakeholder sharing
+  - Email report to team members
+  - CSV export for bulk analysis
+
+- **Bulk Page Scanning** - Analyze multiple pages in one operation
+  - Queue-based processing
+  - Background jobs for large sites
+  - Progress tracking UI
+
+- **Resource Type Icons** - Add visual icons for quick recognition
+  - 🖼️ Images, 📜 Scripts, 🎨 CSS, 🔗 Links
+  - Improve visual scanning of resource lists
+
+- **Quick Actions** - Contextual actions for resource optimization
+  - "View in Content Hub" for images
+  - "Optimize this resource" shortcuts
+  - Direct links to AIRA optimization tools
+
+### Low Priority
+- **Carbon Impact Context** - Make numbers more tangible
+  - "Equivalent to X trees planted"
+  - "X km driven in a car"
+  - Help non-technical users understand impact
+
+- **Configurable Thresholds** - Allow custom rating thresholds per site
+  - Adjust A/B/C/D/E/F boundaries
+  - Different standards for different content types
+
+- **Automated Testing Suite**
+  - Unit tests for SustainabilityService
+  - Integration tests for database operations
+  - E2E tests for admin UI
+
+- **CI/CD Pipeline Improvements**
+  - Automated NuGet package publishing
+  - Release notes generation
+  - Automated testing in pipeline
+
+### Technical Debt
+- **Bundle @tgwf/co2 locally** - Remove Skypack CDN dependency for reliability
+- **Component Migration** - Convert custom UI components to use more native XbyK components where possible
+- **Performance Optimization** - Cache Playwright browser instance for faster subsequent runs

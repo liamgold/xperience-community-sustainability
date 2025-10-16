@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+  Button,
+  ButtonColor,
+  ButtonSize,
+  Stack,
+  Headline,
+  HeadlineSize,
+  Row,
+  Column,
+  Spacing,
+  Divider,
+} from "@kentico/xperience-admin-components";
 import { usePageCommand } from "@kentico/xperience-admin-base";
 
 enum PageAvailabilityStatus {
@@ -39,27 +42,226 @@ type ExternalResourceGroup = {
 };
 
 const ratingDescriptions: Record<string, string> = {
-  "A+": "Extremely efficient (≤ 0.040g CO₂ per page view)",
-  A: "Very efficient (≤ 0.079g CO₂ per page view)",
-  B: "Efficient (≤ 0.145g CO₂ per page view)",
-  C: "Moderate efficiency (≤ 0.209g CO₂ per page view)",
-  D: "Low efficiency (≤ 0.278g CO₂ per page view)",
-  E: "Poor efficiency (≤ 0.359g CO₂ per page view)",
-  F: "Very poor efficiency (> 0.359g CO₂ per page view)",
+  "A+": "Extremely efficient",
+  A: "Very efficient",
+  B: "Efficient",
+  C: "Moderate efficiency",
+  D: "Low efficiency",
+  E: "Poor efficiency",
+  F: "Very poor efficiency",
 };
 
-const ratingColor: Record<string, string> = {
-  "A+": "text-emerald-600", // 🌿 Ultra efficient
-  A: "text-green-600", // ✅ Very efficient
-  B: "text-lime-600", // 👍 Efficient
-  C: "text-yellow-600", // 😐 Moderate
-  D: "text-amber-600", // ⚠️ Low
-  E: "text-orange-600", // 🚨 Poor
-  F: "text-red-600", // ❌ Very poor
+const ratingColors: Record<string, { primary: string; bg: string; border: string }> = {
+  "A+": { primary: "#059669", bg: "#d1fae5", border: "#6ee7b7" },
+  A: { primary: "#16a34a", bg: "#dcfce7", border: "#86efac" },
+  B: { primary: "#65a30d", bg: "#ecfccb", border: "#bef264" },
+  C: { primary: "#ca8a04", bg: "#fef9c3", border: "#fde047" },
+  D: { primary: "#ea580c", bg: "#ffedd5", border: "#fdba74" },
+  E: { primary: "#dc2626", bg: "#fee2e2", border: "#fca5a5" },
+  F: { primary: "#b91c1c", bg: "#fee2e2", border: "#f87171" },
 };
 
 const Commands = {
   RunReport: "RunReport",
+};
+
+const StatCard = ({
+  label,
+  value,
+  subtitle,
+}: {
+  label: string;
+  value: string;
+  subtitle?: string;
+}) => (
+  <div
+    style={{
+      padding: "20px",
+      background: "white",
+      border: "1px solid #e5e7eb",
+      borderRadius: "8px",
+      boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+    }}
+  >
+    <div
+      style={{
+        fontSize: "13px",
+        fontWeight: 600,
+        color: "#6b7280",
+        textTransform: "uppercase",
+        letterSpacing: "0.5px",
+        marginBottom: "8px",
+      }}
+    >
+      {label}
+    </div>
+    <div
+      style={{
+        fontSize: "28px",
+        fontWeight: 700,
+        color: "#111827",
+        marginBottom: subtitle ? "4px" : "0",
+      }}
+    >
+      {value}
+    </div>
+    {subtitle && (
+      <div style={{ fontSize: "12px", color: "#9ca3af" }}>{subtitle}</div>
+    )}
+  </div>
+);
+
+const ResourceGroupCard = ({
+  group,
+  totalPageSize
+}: {
+  group: ExternalResourceGroup;
+  totalPageSize: number;
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const displayCount = expanded ? group.resources.length : 3;
+
+  return (
+    <div
+      style={{
+        background: "white",
+        border: "1px solid #e5e7eb",
+        borderRadius: "8px",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          padding: "16px 20px",
+          background: "#f9fafb",
+          borderBottom: "1px solid #e5e7eb",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <div>
+          <div style={{ fontSize: "15px", fontWeight: 600, color: "#111827" }}>
+            {group.name}
+          </div>
+          <div style={{ fontSize: "13px", color: "#6b7280", marginTop: "2px" }}>
+            {group.resources.length} resource
+            {group.resources.length !== 1 ? "s" : ""} •{" "}
+            {group.totalSize.toFixed(2)} KB
+          </div>
+        </div>
+        <div
+          style={{
+            padding: "4px 12px",
+            background: "#eff6ff",
+            color: "#1e40af",
+            fontSize: "13px",
+            fontWeight: 600,
+            borderRadius: "12px",
+          }}
+        >
+          {((group.totalSize / totalPageSize) * 100).toFixed(1)}% of page
+        </div>
+      </div>
+      {group.resources.length > 0 && (
+        <div style={{ padding: "12px 20px" }}>
+          {group.resources.slice(0, displayCount).map((resource, idx) => {
+            const fileName = resource.url.split("/").pop() || resource.url;
+            const path = resource.url.substring(
+              0,
+              resource.url.lastIndexOf("/") + 1
+            );
+
+            return (
+              <div
+                key={idx}
+                style={{
+                  padding: "12px 0",
+                  borderBottom:
+                    idx < displayCount - 1 ? "1px solid #f3f4f6" : "none",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: "12px",
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: 500,
+                        color: "#111827",
+                        marginBottom: "2px",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {fileName}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "#9ca3af",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                      title={path}
+                    >
+                      {path}
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: "#6b7280",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {resource.size.toFixed(2)} KB
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {group.resources.length > 3 && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              style={{
+                marginTop: "12px",
+                padding: "8px 16px",
+                background: "transparent",
+                border: "1px solid #e5e7eb",
+                borderRadius: "6px",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#6366f1",
+                cursor: "pointer",
+                width: "100%",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#f9fafb";
+                e.currentTarget.style.borderColor = "#6366f1";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.borderColor = "#e5e7eb";
+              }}
+            >
+              {expanded
+                ? "Show less"
+                : `Show ${group.resources.length - 3} more`}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export const SustainabilityTabTemplate = (
@@ -89,156 +291,305 @@ export const SustainabilityTabTemplate = (
 
   if (data === undefined || data === null) {
     return (
-      <div className="p-4 space-y-4">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Sustainability Report
-        </h1>
+      <div style={{ padding: "32px", maxWidth: "1400px", margin: "0 auto" }}>
+        <Stack spacing={Spacing.XL}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Headline size={HeadlineSize.L}>Sustainability Report</Headline>
+          </div>
 
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Card className="w-full max-w-md text-center bg-card text-card-foreground">
-            <CardHeader>
-              <CardTitle className="text-xl">
-                No Sustainability Data Found
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {props?.pageAvailability === PageAvailabilityStatus.Available ? (
-                <>
-                  <p className="text-muted-foreground">
-                    We haven't retrieved any sustainability data for this page
-                    yet.
-                  </p>
-                  {error && (
-                    <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">
-                      {error}
-                    </div>
-                  )}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "400px",
+            }}
+          >
+            <Card headline="No Data Available" fullHeight={false}>
+              <Stack spacing={Spacing.L}>
+                <p style={{ fontSize: "14px", color: "#6b7280" }}>
+                  {props?.pageAvailability === PageAvailabilityStatus.Available
+                    ? "Run a sustainability analysis to see your page's environmental impact."
+                    : "This page is not available for analysis."}
+                </p>
+                {error && (
+                  <div
+                    style={{
+                      padding: "12px 16px",
+                      background: "#fef2f2",
+                      border: "1px solid #fecaca",
+                      borderRadius: "6px",
+                      fontSize: "13px",
+                      color: "#dc2626",
+                    }}
+                  >
+                    {error}
+                  </div>
+                )}
+                {props?.pageAvailability ===
+                  PageAvailabilityStatus.Available && (
                   <Button
+                    label="Run Analysis"
+                    color={ButtonColor.Primary}
+                    size={ButtonSize.L}
                     disabled={isLoading}
+                    inProgress={isLoading}
                     onClick={() => {
                       setIsLoading(true);
                       setError(null);
                       submit();
                     }}
-                  >
-                    {isLoading && <Loader2 className="animate-spin" />}
-                    Run Sustainability Report
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <p className="text-muted-foreground">
-                    The page is not available, so we cannot retrieve the data.
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                  />
+                )}
+              </Stack>
+            </Card>
+          </div>
+        </Stack>
       </div>
     );
   }
 
-  const renderResourceList = (resources: ExternalResource[]) =>
-    resources.length > 0 ? (
-      <ul className="list-disc list-inside text-sm space-y-0.5">
-        {resources.map((item, i) => (
-          <li key={i}>
-            {item.url} ({item.size.toFixed(2)}KB)
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p className="text-muted-foreground text-sm">No resources found.</p>
-    );
+  const ratingColor = ratingColors[data.carbonRating] || ratingColors.C;
+  const totalResources = data.resourceGroups.reduce(
+    (sum, group) => sum + group.resources.length,
+    0
+  );
 
   return (
-    <div className="p-4 space-y-4">
-      {/* New Title */}
-      <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-        Sustainability Report
-      </h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Left column: Resource groups */}
-        <div className="md:col-span-2 space-y-4">
-          {data.resourceGroups.map((group) => (
-            <Card key={group.type}>
-              <CardHeader>
-                <CardTitle>{group.name}</CardTitle>
-                <CardDescription>
-                  Total size: {group.totalSize.toFixed(2)}KB
-                </CardDescription>
-              </CardHeader>
-              <CardContent>{renderResourceList(group.resources)}</CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Right column: Summary */}
-        <div className="space-y-4">
-          <Card className="max-w-sm w-full">
-            <CardHeader>
-              <CardTitle>Sustainability report</CardTitle>
-              <CardDescription>Last tested: {data.lastRunDate}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {error && (
-                <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">
-                  {error}
-                </div>
-              )}
-              <Button
-                disabled={isLoading}
-                onClick={() => {
-                  setIsLoading(true);
-                  setError(null);
-                  submit();
-                }}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 w-full"
-              >
-                {isLoading && <Loader2 className="animate-spin" />}
-                Run again
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="max-w-sm w-full">
-            <CardHeader>
-              <CardTitle>Page size</CardTitle>
-            </CardHeader>
-            <CardContent className="text-xl font-semibold">
-              {data.totalSize.toFixed(2)}KB
-            </CardContent>
-          </Card>
-
-          <Card className="max-w-sm w-full">
-            <CardHeader>
-              <CardTitle>CO₂ per page view</CardTitle>
-            </CardHeader>
-            <CardContent className="text-xl font-semibold">
-              {data.totalEmissions.toFixed(4)}g
-            </CardContent>
-          </Card>
-
-          {/* Carbon rating */}
-          <Card className="max-w-sm w-full">
-            <CardHeader>
-              <CardTitle>Carbon rating</CardTitle>
-              <CardDescription>
-                {ratingDescriptions[data.carbonRating] || "No rating available"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent
-              className={cn(
-                "text-3xl font-bold",
-                ratingColor[data.carbonRating] || "text-muted-foreground"
-              )}
+    <div style={{ padding: "32px", maxWidth: "1400px", margin: "0 auto" }}>
+      <Stack spacing={Spacing.XL}>
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "16px",
+          }}
+        >
+          <div>
+            <Headline size={HeadlineSize.L}>Sustainability Report</Headline>
+            <div
+              style={{
+                fontSize: "14px",
+                color: "#6b7280",
+                marginTop: "4px",
+              }}
             >
-              {data.carbonRating}
-            </CardContent>
-          </Card>
+              Last analyzed: {data.lastRunDate}
+            </div>
+          </div>
+          <Button
+            label="Run New Analysis"
+            color={ButtonColor.Primary}
+            size={ButtonSize.M}
+            disabled={isLoading}
+            inProgress={isLoading}
+            onClick={() => {
+              setIsLoading(true);
+              setError(null);
+              submit();
+            }}
+          />
         </div>
-      </div>
+
+        {error && (
+          <div
+            style={{
+              padding: "16px",
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: "8px",
+              fontSize: "14px",
+              color: "#dc2626",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {/* Hero Carbon Rating Card */}
+        <div
+          style={{
+            background: `linear-gradient(135deg, ${ratingColor.bg} 0%, white 100%)`,
+            border: `2px solid ${ratingColor.border}`,
+            borderRadius: "12px",
+            padding: "40px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: "-50px",
+              right: "-50px",
+              width: "200px",
+              height: "200px",
+              background: ratingColor.bg,
+              borderRadius: "50%",
+              opacity: 0.3,
+            }}
+          />
+          <Row spacing={Spacing.XL}>
+            <Column colsLg={6} colsMd={12}>
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    color: ratingColor.primary,
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                    marginBottom: "12px",
+                  }}
+                >
+                  Carbon Rating
+                </div>
+                <div
+                  style={{
+                    fontSize: "120px",
+                    fontWeight: 900,
+                    color: ratingColor.primary,
+                    lineHeight: 1,
+                    marginBottom: "16px",
+                    textShadow: `0 2px 8px ${ratingColor.bg}`,
+                  }}
+                >
+                  {data.carbonRating}
+                </div>
+                <div
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: 600,
+                    color: "#111827",
+                    marginBottom: "8px",
+                  }}
+                >
+                  {ratingDescriptions[data.carbonRating]}
+                </div>
+                <div style={{ fontSize: "14px", color: "#6b7280" }}>
+                  {data.carbonRating === "A+" || data.carbonRating === "A"
+                    ? "This page has excellent carbon efficiency."
+                    : data.carbonRating === "B" || data.carbonRating === "C"
+                    ? "This page has room for improvement."
+                    : "This page needs significant optimization."}
+                </div>
+              </div>
+            </Column>
+            <Column colsLg={6} colsMd={12}>
+              <Row spacing={Spacing.L} spacingY={Spacing.L}>
+                <Column colsLg={6} colsMd={6}>
+                  <StatCard
+                    label="CO₂ Emissions"
+                    value={`${data.totalEmissions.toFixed(3)}g`}
+                    subtitle="per page view"
+                  />
+                </Column>
+                <Column colsLg={6} colsMd={6}>
+                  <StatCard
+                    label="Page Weight"
+                    value={`${(data.totalSize / 1024).toFixed(2)}MB`}
+                    subtitle={`${data.totalSize.toFixed(0)} KB total`}
+                  />
+                </Column>
+                <Column colsLg={6} colsMd={6}>
+                  <StatCard
+                    label="Resources"
+                    value={`${totalResources}`}
+                    subtitle={`${data.resourceGroups.length} categories`}
+                  />
+                </Column>
+                <Column colsLg={6} colsMd={6}>
+                  <StatCard
+                    label="Efficiency"
+                    value={
+                      data.totalEmissions < 0.1
+                        ? "Excellent"
+                        : data.totalEmissions < 0.2
+                        ? "Good"
+                        : data.totalEmissions < 0.3
+                        ? "Fair"
+                        : "Poor"
+                    }
+                    subtitle="Overall rating"
+                  />
+                </Column>
+              </Row>
+            </Column>
+          </Row>
+        </div>
+
+        {/* Resource Breakdown */}
+        <div>
+          <Headline size={HeadlineSize.M} spacingBottom={Spacing.L}>
+            Resource Breakdown
+          </Headline>
+          <Stack spacing={Spacing.L}>
+            {data.resourceGroups
+              .sort((a, b) => b.totalSize - a.totalSize)
+              .map((group) => (
+                <ResourceGroupCard key={group.type} group={group} totalPageSize={data.totalSize} />
+              ))}
+          </Stack>
+        </div>
+
+        {/* Tips Section */}
+        <div
+          style={{
+            padding: "24px",
+            background: "#f0f9ff",
+            border: "1px solid #bae6fd",
+            borderRadius: "8px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "15px",
+              fontWeight: 600,
+              color: "#0c4a6e",
+              marginBottom: "12px",
+            }}
+          >
+            💡 Tips to improve your carbon footprint
+          </div>
+          <ul style={{ margin: 0, paddingLeft: "20px", color: "#075985" }}>
+            <li style={{ marginBottom: "6px" }}>
+              <strong>Use Image Variants</strong> - Configure responsive image variants
+              with specific dimensions and aspect ratios to serve optimized versions
+              for different contexts (hero banners, thumbnails, social media)
+            </li>
+            <li style={{ marginBottom: "6px" }}>
+              <strong>Enable AIRA's Smart Optimization</strong> - Leverage AIRA's AI-powered
+              features for automatic image format conversion, smart focal point detection,
+              and automated quality optimization during uploads
+            </li>
+            <li style={{ marginBottom: "6px" }}>
+              <strong>Automate Image Metadata</strong> - Use AIRA to automatically generate
+              alt texts, descriptions, and tags for better SEO while reducing manual work
+            </li>
+            <li style={{ marginBottom: "6px" }}>
+              <strong>Minimize CSS & JavaScript</strong> - Bundle and minify your assets to
+              reduce file sizes and decrease the number of HTTP requests
+            </li>
+            <li style={{ marginBottom: "6px" }}>
+              <strong>Enable Browser Caching</strong> - Configure cache headers for static
+              resources to reduce repeat downloads and server load
+            </li>
+            <li>
+              <strong>Implement Lazy Loading</strong> - Load images and resources only when
+              they're needed, improving initial page load performance
+            </li>
+          </ul>
+        </div>
+      </Stack>
     </div>
   );
 };
