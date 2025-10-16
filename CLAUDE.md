@@ -210,27 +210,9 @@ This registers:
 
 ## Known Issues & Limitations
 
-### Potential Improvements
-1. **External CDN dependency**: Skypack CDN for @tgwf/co2 (availability risk) - consider bundling locally
-2. **Commented dashboard**: Dashboard feature is commented out (line 5-12 in SustainabilityDashboard.cs) - planned for future
-3. **No automated tests**: Consider adding unit/integration tests
-
-### Recently Fixed (v2.0.0+)
-- ✓ Memory leak with Playwright disposal
-- ✓ Service lifetime (Singleton → Scoped)
-- ✓ Mixed JSON serializers (now all System.Text.Json)
-- ✓ Hardcoded timeout (now configurable)
-- ✓ Limited error handling (added comprehensive catch blocks)
-- ✓ React error states (added error UI)
-- ✓ Naming conventions (DTOs now use PascalCase)
-- ✓ Database query optimization
-- ✓ Enum extension fragility
-- ✓ Null checking for deserialization
-- ✓ Magic strings extracted to constants
-- ✓ UI migration from ShadCN to native XbyK components
-- ✓ Dashboard-style redesign with hero rating section
-- ✓ Collapsible resource lists for better UX
-- ✓ XbyK-specific optimization tips (Image Variants, AIRA)
+- **External CDN dependency**: Skypack CDN for @tgwf/co2 (availability risk) - see GitHub issues for planned improvements
+- **No automated tests**: Unit/integration tests needed for service and UI components
+- **Future enhancements**: See GitHub issues for planned features (global dashboard, historical trends, etc.)
 
 ## Development Workflow
 
@@ -249,23 +231,12 @@ dotnet run
 
 ### Frontend Development
 
-Client code is built separately (likely via npm/webpack - check Client folder for package.json).
-
-### Creating a Release
-
-- Version is set in `XperienceCommunity.Sustainability.csproj` (line 14)
-- `GeneratePackageOnBuild` is enabled (line 25)
-- NuGet package includes icon, README, and LICENSE
-
-## Testing Strategy
-
-**Current state**: No automated tests visible in repository.
-
-**Recommended additions**:
-- Unit tests for `SustainabilityService` (mock Playwright)
-- Integration tests for database operations
-- E2E tests for admin UI interactions
-- Tests for resource-checker.js logic
+Client code is built using webpack:
+```bash
+cd src/Client
+npm install
+npm run build
+```
 
 ## Dependencies
 
@@ -305,11 +276,6 @@ Update `ResourceGroupType` enum (ExternalResourceGroup.cs:43-55) and `GetInitiat
 2. Regenerate `SustainabilityPageDataInfo.generated.cs` (Kentico tooling)
 3. Update save/load logic in `SustainabilityService.cs`
 
-## Git Workflow
-
-**Main branch**: `main`
-**Recent work**: UNC path support for shared hosting (commits: 4f08bbd, 2c230ba, fff6239)
-
 ## Debugging Tips
 
 1. **Playwright issues**: Check event log in Kentico admin for logged errors
@@ -317,73 +283,3 @@ Update `ResourceGroupType` enum (ExternalResourceGroup.cs:43-55) and `GetInitiat
 3. **Timeout errors**: Increase timeout in SustainabilityService.cs:60 or check if page loads slowly
 4. **CSP errors**: Ensure `BypassCSP = true` is set (line 45)
 5. **Browser not found**: Playwright requires browser installation (`playwright install chromium`)
-
-## Related Resources
-
-- [Sustainable Web Design](https://sustainablewebdesign.org/digital-carbon-ratings/)
-- [The Green Web Foundation CO2.js](https://developers.thegreenwebfoundation.org/co2js/overview/)
-- [Umbraco.Community.Sustainability](https://github.com/umbraco-community/Umbraco.Community.Sustainability)
-- [Blog: Bringing Sustainability Insights to Xperience](https://www.goldfinch.me/blog/bringing-sustainability-insights-to-xperience-by-kentico)
-
-## Future Enhancements
-
-### High Priority
-- **Global Dashboard** - Implement site-wide sustainability dashboard (currently commented out in SustainabilityDashboard.cs)
-  - Overview of all pages with their carbon ratings
-  - Site-wide statistics and trends
-  - Identify worst-performing pages
-
-- **Historical Trend Analysis** - Track sustainability improvements over time
-  - Chart showing rating changes per page
-  - Compare current vs. previous reports
-  - Visual indicators (↑ Improved, → No change, ↓ Declined)
-
-- **Progress/Comparison Feature** - Show trend indicators in page-level reports
-  - Display previous rating alongside current
-  - Percentage improvement metrics
-  - Requires database schema update to track history
-
-### Medium Priority
-- **Export/Share Functionality**
-  - Export report as PDF for stakeholder sharing
-  - Email report to team members
-  - CSV export for bulk analysis
-
-- **Bulk Page Scanning** - Analyze multiple pages in one operation
-  - Queue-based processing
-  - Background jobs for large sites
-  - Progress tracking UI
-
-- **Resource Type Icons** - Add visual icons for quick recognition
-  - 🖼️ Images, 📜 Scripts, 🎨 CSS, 🔗 Links
-  - Improve visual scanning of resource lists
-
-- **Quick Actions** - Contextual actions for resource optimization
-  - "View in Content Hub" for images
-  - "Optimize this resource" shortcuts
-  - Direct links to AIRA optimization tools
-
-### Low Priority
-- **Carbon Impact Context** - Make numbers more tangible
-  - "Equivalent to X trees planted"
-  - "X km driven in a car"
-  - Help non-technical users understand impact
-
-- **Configurable Thresholds** - Allow custom rating thresholds per site
-  - Adjust A/B/C/D/E/F boundaries
-  - Different standards for different content types
-
-- **Automated Testing Suite**
-  - Unit tests for SustainabilityService
-  - Integration tests for database operations
-  - E2E tests for admin UI
-
-- **CI/CD Pipeline Improvements**
-  - Automated NuGet package publishing
-  - Release notes generation
-  - Automated testing in pipeline
-
-### Technical Debt
-- **Bundle @tgwf/co2 locally** - Remove Skypack CDN dependency for reliability
-- **Component Migration** - Convert custom UI components to use more native XbyK components where possible
-- **Performance Optimization** - Cache Playwright browser instance for faster subsequent runs
