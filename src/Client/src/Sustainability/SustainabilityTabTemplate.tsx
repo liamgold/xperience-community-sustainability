@@ -227,23 +227,28 @@ const ResourceGroupCard = ({
     <div style={resourceGroupCardStyles.container}>
       <div style={resourceGroupCardStyles.header}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "48px",
-              height: "48px",
-              borderRadius: "8px",
-              backgroundColor: getResourceTypeColor(group.name).bg,
-              color: getResourceTypeColor(group.name).color,
-              border: `1px solid ${getResourceTypeColor(group.name).border}`,
-              flexShrink: 0,
-              fontSize: "24px",
-            }}
-          >
-            <Icon name={getResourceTypeIcon(group.name)} />
-          </div>
+          {(() => {
+            const resourceTypeColor = getResourceTypeColor(group.name);
+            return (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "8px",
+                  backgroundColor: resourceTypeColor.bg,
+                  color: resourceTypeColor.color,
+                  border: `1px solid ${resourceTypeColor.border}`,
+                  flexShrink: 0,
+                  fontSize: "24px",
+                }}
+              >
+                <Icon name={getResourceTypeIcon(group.name)} />
+              </div>
+            );
+          })()}
           <div>
             <div style={resourceGroupCardStyles.title}>
               {group.name}
