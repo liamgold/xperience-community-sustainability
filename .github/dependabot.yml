@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # Maintain dependencies for Admin Client project (npm)
+  - package-ecosystem: "npm"
+    directory: "/src/Client/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "07:00"
+    ignore:
+      - dependency-name: "@kentico/*"
+    groups:
+      react:
+        patterns:
+          - "react*"
+          - "@types/react*"
+      webpack:
+        patterns:
+          - "webpack*"
+          - "*-loader"
+    open-pull-requests-limit: 5
+
+  # Maintain NuGet dependencies for main library
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "07:00"
+    ignore:
+      - dependency-name: "Kentico.Xperience.*"
+    open-pull-requests-limit: 5
