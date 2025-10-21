@@ -11,6 +11,7 @@ import {
   Column,
   Spacing,
   Divider,
+  Icon,
 } from "@kentico/xperience-admin-components";
 import { usePageCommand } from "@kentico/xperience-admin-base";
 
@@ -59,6 +60,28 @@ const ratingColors: Record<string, { primary: string; bg: string; border: string
   D: { primary: "#ea580c", bg: "#ffedd5", border: "#fdba74" },
   E: { primary: "#dc2626", bg: "#fee2e2", border: "#fca5a5" },
   F: { primary: "#b91c1c", bg: "#fee2e2", border: "#f87171" },
+};
+
+const getResourceTypeIcon = (resourceType: string): string => {
+  const typeMap: Record<string, string> = {
+    Images: "xp-picture",
+    Scripts: "xp-braces",
+    CSS: "xp-brush",
+    Links: "xp-chain",
+    Other: "xp-file",
+  };
+  return typeMap[resourceType] || "xp-file";
+};
+
+const getResourceTypeColor = (resourceType: string): { bg: string; color: string; border: string } => {
+  const colorMap: Record<string, { bg: string; color: string; border: string }> = {
+    Images: { bg: "#dbeafe", color: "#1e40af", border: "#bfdbfe" }, // Blue
+    Scripts: { bg: "#ede9fe", color: "#7c3aed", border: "#ddd6fe" }, // Purple
+    CSS: { bg: "#fce7f3", color: "#db2777", border: "#fbcfe8" }, // Pink
+    Links: { bg: "#d1fae5", color: "#059669", border: "#a7f3d0" }, // Green
+    Other: { bg: "#f3f4f6", color: "#6b7280", border: "#e5e7eb" }, // Gray
+  };
+  return colorMap[resourceType] || colorMap.Other;
 };
 
 const Commands = {
@@ -203,14 +226,33 @@ const ResourceGroupCard = ({
   return (
     <div style={resourceGroupCardStyles.container}>
       <div style={resourceGroupCardStyles.header}>
-        <div>
-          <div style={resourceGroupCardStyles.title}>
-            {group.name}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "48px",
+              height: "48px",
+              borderRadius: "8px",
+              backgroundColor: getResourceTypeColor(group.name).bg,
+              color: getResourceTypeColor(group.name).color,
+              border: `1px solid ${getResourceTypeColor(group.name).border}`,
+              flexShrink: 0,
+              fontSize: "24px",
+            }}
+          >
+            <Icon name={getResourceTypeIcon(group.name)} />
           </div>
-          <div style={resourceGroupCardStyles.subtitle}>
-            {group.resources.length} resource
-            {group.resources.length !== 1 ? "s" : ""} •{" "}
-            {group.totalSize.toFixed(2)} KB
+          <div>
+            <div style={resourceGroupCardStyles.title}>
+              {group.name}
+            </div>
+            <div style={resourceGroupCardStyles.subtitle}>
+              {group.resources.length} resource
+              {group.resources.length !== 1 ? "s" : ""} •{" "}
+              {group.totalSize.toFixed(2)} KB
+            </div>
           </div>
         </div>
         <div style={resourceGroupCardStyles.badge}>
