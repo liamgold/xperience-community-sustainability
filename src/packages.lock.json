@@ -33,9 +33,9 @@
       },
       "Microsoft.Playwright": {
         "type": "Direct",
-        "requested": "[1.52.0, )",
-        "resolved": "1.52.0",
-        "contentHash": "zH8a7OiXtq8BC6i0yYHAG/DSN8J8/bVyQYVESK7mK1ZJF19eY1ca51BAQpQxzF+Qm/A20x6Rsl8cT+QYXSfxbw==",
+        "requested": "[1.55.0, )",
+        "resolved": "1.55.0",
+        "contentHash": "iPVHeRI5EZB1gK43MC/qnINvGUV3pYh/PJn5wNmeaiZ4ARlFAfK3azf46c7/kx/lmVaknZ5rSNT1F8SZgSaWSQ==",
         "dependencies": {
           "Microsoft.Bcl.AsyncInterfaces": "6.0.0",
           "System.ComponentModel.Annotations": "5.0.0",
@@ -1001,14 +1001,6 @@
         "contentHash": "t16Z+OplJEElJy1Q6t12EwMGF2BeLw8IKjD1ema7ewbCRaMqeVIRPZo3MlxidnRFRK+tV6II8tKYX+7N5ZS98A==",
         "dependencies": {
           "System.IO.Hashing": "8.0.0"
-        }
-      },
-      "xperiencecommunity.sustainability.core": {
-        "type": "Project",
-        "dependencies": {
-          "Kentico.Xperience.admin": "[30.4.2, )",
-          "Kentico.Xperience.webapp": "[30.4.2, )",
-          "Microsoft.Playwright": "[1.52.0, )"
         }
       }
     }
