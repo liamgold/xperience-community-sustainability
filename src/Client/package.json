@@ -22,7 +22,7 @@
     "@babel/plugin-transform-runtime": "^7.28.3",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.26.3",
-    "@babel/preset-typescript": "^7.27.0",
+    "@babel/preset-typescript": "^7.28.5",
     "@kentico/xperience-webpack-config": "30.4.2",
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18.3.6",
