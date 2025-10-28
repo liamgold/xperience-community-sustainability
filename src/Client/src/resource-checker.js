@@ -48,7 +48,7 @@ function getResources() {
     // Filter out the resource-checker.js script itself to avoid artificially inflating page weight calculations
     return allResources.filter(resource => {
         const url = resource.name || '';
-        return !url.includes('resource-checker.js');
+        return !url.split('?')[0].endsWith('resource-checker.js');
     });
 }
 
