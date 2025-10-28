@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
+using System.Reflection;
 using System.Text.Json;
 using XperienceCommunity.Sustainability.Models;
 
@@ -23,8 +24,14 @@ public class SustainabilityService : ISustainabilityService
     private readonly IInfoProvider<SustainabilityPageDataInfo> _sustainabilityPageDataInfoProvider;
     private readonly SustainabilityOptions _options;
 
-    private const string ScriptPath = "/_content/XperienceCommunity.Sustainability/scripts/resource-checker.js";
+    private static readonly string ScriptPath = GetScriptPath();
     private const string SustainabilityDataTestId = "sustainabilityData";
+
+    private static string GetScriptPath()
+    {
+        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
+        return $"/_content/XperienceCommunity.Sustainability/scripts/resource-checker.js?v={version}";
+    }
 
     public SustainabilityService(
         IWebHostEnvironment env,
