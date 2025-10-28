@@ -6,11 +6,14 @@
   "scripts": {
     "start": "webpack serve --mode development",
     "dev:buildlike": "webpack serve --mode development --env buildlike=true",
-    "build": "webpack --mode=production"
+    "build": "npm run build:admin && npm run build:resource-checker",
+    "build:admin": "webpack --mode=production",
+    "build:resource-checker": "webpack --config webpack.resource-checker.config.js"
   },
   "dependencies": {
     "@kentico/xperience-admin-base": "30.4.2",
     "@kentico/xperience-admin-components": "30.4.2",
+    "@tgwf/co2": "^0.15.0",
     "css-loader": "^7.1.2",
     "postcss-loader": "^8.2.0",
     "react": "^18.3.1",
