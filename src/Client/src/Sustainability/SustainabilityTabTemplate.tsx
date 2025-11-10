@@ -31,6 +31,7 @@ type SustainabilityData = {
   totalEmissions: number;
   lastRunDate: string;
   carbonRating: string;
+  greenHostingStatus?: string;
 };
 
 type ExternalResource = { url: string; size: number };
@@ -82,6 +83,46 @@ const getResourceTypeColor = (resourceType: string): { bg: string; color: string
     Other: { bg: "#f3f4f6", color: "#6b7280", border: "#e5e7eb" }, // Gray
   };
   return colorMap[resourceType] || colorMap.Other;
+};
+
+const getHostingStatusDisplay = (status?: string): {
+  text: string;
+  color: string;
+  icon: string;
+  bgColor: string;
+  borderColor: string;
+  description: string;
+} => {
+  switch (status) {
+    case "Green":
+      return {
+        text: "Green hosting",
+        color: "#059669",
+        icon: "●",
+        bgColor: "#f0fdf4",
+        borderColor: "#86efac",
+        description: "This site is hosted on a green energy provider"
+      };
+    case "NotGreen":
+      return {
+        text: "Standard hosting",
+        color: "#f97316",
+        icon: "●",
+        bgColor: "#fff7ed",
+        borderColor: "#fdba74",
+        description: "This site uses standard grid energy hosting"
+      };
+    case "Unknown":
+    default:
+      return {
+        text: "Unknown hosting",
+        color: "#6b7280",
+        icon: "●",
+        bgColor: "#f3f4f6",
+        borderColor: "#d1d5db",
+        description: "Unable to verify the hosting provider's energy source"
+      };
+  }
 };
 
 const Commands = {
@@ -404,6 +445,7 @@ export const SustainabilityTabTemplate = (
     (sum, group) => sum + group.resources.length,
     0
   );
+  const hostingStatus = getHostingStatusDisplay(data.greenHostingStatus);
 
   return (
     <div style={{ padding: "32px", maxWidth: "1400px", margin: "0 auto" }}>
@@ -526,6 +568,27 @@ export const SustainabilityTabTemplate = (
                     ? "This page has room for improvement."
                     : "This page needs significant optimization."}
                 </div>
+                <div style={{
+                  fontSize: "12px",
+                  color: "#9ca3af",
+                  marginTop: "12px",
+                  paddingTop: "12px",
+                  borderTop: "1px solid #e5e7eb"
+                }}>
+                  Rating based on{" "}
+                  <a
+                    href="https://sustainablewebdesign.org/digital-carbon-ratings/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: ratingColor.primary,
+                      textDecoration: "underline",
+                      fontWeight: 500
+                    }}
+                  >
+                    Sustainable Web Design Model v4
+                  </a>
+                </div>
               </div>
             </Column>
             <Column colsLg={6} colsMd={12}>
@@ -569,6 +632,44 @@ export const SustainabilityTabTemplate = (
               </Row>
             </Column>
           </Row>
+        </div>
+
+        {/* Hosting Status Info Banner */}
+        <div
+          style={{
+            padding: "16px 20px",
+            background: hostingStatus.bgColor,
+            border: `1px solid ${hostingStatus.borderColor}`,
+            borderRadius: "8px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "20px",
+              color: hostingStatus.color,
+              lineHeight: 1,
+            }}
+          >
+            {hostingStatus.icon}
+          </span>
+          <div>
+            <div
+              style={{
+                fontSize: "14px",
+                fontWeight: 600,
+                color: hostingStatus.color,
+                marginBottom: "2px",
+              }}
+            >
+              {hostingStatus.text}
+            </div>
+            <div style={{ fontSize: "13px", color: "#6b7280" }}>
+              {hostingStatus.description}
+            </div>
+          </div>
         </div>
 
         {/* Resource Breakdown */}

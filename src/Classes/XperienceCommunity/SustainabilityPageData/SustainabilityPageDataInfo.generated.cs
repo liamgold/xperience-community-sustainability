@@ -119,6 +119,17 @@ namespace XperienceCommunity.Sustainability
 
 
         /// <summary>
+        /// Green hosting status.
+        /// </summary>
+        [DatabaseField]
+        public virtual string GreenHostingStatus
+        {
+            get => ValidationHelper.GetString(GetValue(nameof(GreenHostingStatus)), String.Empty);
+            set => SetValue(nameof(GreenHostingStatus), value);
+        }
+
+
+        /// <summary>
         /// Deletes the object using appropriate provider.
         /// </summary>
         protected override void DeleteObject()
