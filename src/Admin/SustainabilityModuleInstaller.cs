@@ -118,6 +118,15 @@ internal class SustainabilityModuleInstaller(IInfoProvider<ResourceInfo> resourc
         };
         formInfo.AddFormItem(formItem);
 
+        formItem = new FormFieldInfo
+        {
+            Name = nameof(SustainabilityPageDataInfo.GreenHostingStatus),
+            Visible = false,
+            DataType = FieldDataType.Text,
+            Enabled = true,
+        };
+        formInfo.AddFormItem(formItem);
+
         SetFormDefinition(info, formInfo);
 
         if (info.HasChanged)

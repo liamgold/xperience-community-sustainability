@@ -14,4 +14,10 @@ public class SustainabilityOptions
     /// For standard hosting, browsers are automatically installed in App_Data/playwright.
     /// </summary>
     public string? PlaywrightBrowserPath { get; set; }
+
+    /// <summary>
+    /// Enable browser console logging to Kentico Event Log for debugging.
+    /// Default: false
+    /// </summary>
+    public bool EnableBrowserConsoleLogging { get; set; } = false;
 }

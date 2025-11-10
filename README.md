@@ -55,6 +55,36 @@ dotnet add package XperienceCommunity.Sustainability
 
 > **Note**: Playwright browsers (Chromium) are automatically installed on first application startup. The installation path defaults to `App_Data/playwright` unless you're hosting on a UNC path.
 
+## Features
+
+### Carbon Emissions Calculation
+
+The package uses the **Sustainable Web Design Model v4 (SWDM v4)** from [The Green Web Foundation](https://www.thegreenwebfoundation.org/) to calculate carbon emissions. Carbon ratings (A+ through F) follow the [official Digital Carbon Ratings](https://sustainablewebdesign.org/digital-carbon-ratings/) methodology.
+
+### Green Hosting Detection
+
+The package automatically checks if your website is hosted on a green energy provider using The Green Web Foundation's database. This affects the carbon calculation:
+
+- **Green hosting**: Uses renewable energy intensity values (lower emissions)
+- **Standard hosting**: Uses global grid intensity values
+- **Unknown**: When verification fails, conservative estimates are used
+
+The hosting status is displayed in the Sustainability report with three possible states:
+
+- ● **Green hosting** - Site uses renewable/green energy
+- ● **Standard hosting** - Site uses standard grid energy
+- ● **Unknown hosting** - Unable to verify hosting provider
+
+### Sustainability Report
+
+Each report includes:
+
+- **Carbon Rating**: Letter grade (A+ through F) based on grams CO₂ per page view
+- **CO₂ Emissions**: Total carbon emissions with hosting status indicator
+- **Page Weight**: Total size of all resources loaded
+- **Resource Breakdown**: Categorized by type (Images, Scripts, CSS, etc.) with individual file sizes
+- **Optimization Tips**: Xperience-specific recommendations for reducing page weight
+
 ## Configuration
 
 The package can be configured using the `Sustainability` section in your `appsettings.json` file.
@@ -63,7 +93,8 @@ The package can be configured using the `Sustainability` section in your `appset
 {
   "Sustainability": {
     "TimeoutMilliseconds": 60000,
-    "PlaywrightBrowserPath": "/custom/path/to/playwright/browsers"
+    "PlaywrightBrowserPath": "/custom/path/to/playwright/browsers",
+    "EnableBrowserConsoleLogging": false
   }
 }
 ```
@@ -74,6 +105,7 @@ The package can be configured using the `Sustainability` section in your `appset
 | ------ | ----------- | ------- |
 | `TimeoutMilliseconds` | Timeout in milliseconds for waiting for sustainability data to be collected from the page. | `60000` (60 seconds) |
 | `PlaywrightBrowserPath` | Custom path where Playwright browsers should be installed. **Only required when hosting on UNC paths (network shares starting with `\\`)**. For standard hosting, browsers are automatically installed in `App_Data/playwright`. | `null` |
+| `EnableBrowserConsoleLogging` | Enable browser console logging to Kentico Event Log for debugging purposes. When enabled, all console messages from the headless browser are logged to help troubleshoot issues. | `false` |
 
 > **Note on UNC Hosting**: When hosting on UNC paths (network shares), you **must** configure `PlaywrightBrowserPath` or the application will throw an error during startup. This setting is ignored for standard hosting scenarios.
 

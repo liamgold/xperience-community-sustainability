@@ -63,6 +63,16 @@ public class SustainabilityService : ISustainabilityService
         });
         var page = await context.NewPageAsync();
 
+        // Capture console logs from the browser (opt-in for debugging)
+        if (_options.EnableBrowserConsoleLogging)
+        {
+            page.Console += (_, msg) =>
+            {
+                _eventLogService.LogInformation(nameof(SustainabilityService), "BrowserConsole",
+                    $"[{msg.Type}] {msg.Text}");
+            };
+        }
+
         await page.GotoAsync(url, new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         try
@@ -77,6 +87,12 @@ public class SustainabilityService : ISustainabilityService
             await locator.WaitForAsync(new() { Timeout = _options.TimeoutMilliseconds, State = WaitForSelectorState.Visible });
 
             var dataJson = await locator.TextContentAsync();
+
+            if (_options.EnableBrowserConsoleLogging)
+            {
+                _eventLogService.LogInformation(nameof(SustainabilityService), nameof(RunNewReport),
+                    $"Received data from page: {dataJson}");
+            }
 
             if (string.IsNullOrWhiteSpace(dataJson))
             {
@@ -96,8 +112,9 @@ public class SustainabilityService : ISustainabilityService
             var sustainabilityResponse = new SustainabilityResponse(DateTime.UtcNow)
             {
                 TotalSize = (sustainabilityData.PageWeight ?? 0) / 1024m,
-                TotalEmissions = sustainabilityData.Emissions?.Co2 ?? 0,
+                TotalEmissions = sustainabilityData.Emissions?.Co2?.Total ?? 0,
                 CarbonRating = sustainabilityData.CarbonRating,
+                GreenHostingStatus = sustainabilityData.GreenHostingStatus,
                 ResourceGroups = resourceGroups,
             };
 
@@ -140,6 +157,7 @@ public class SustainabilityService : ISustainabilityService
             TotalSize = sustainabilityPageDataInfo.TotalSize,
             TotalEmissions = sustainabilityPageDataInfo.TotalEmissions,
             CarbonRating = sustainabilityPageDataInfo.CarbonRating,
+            GreenHostingStatus = sustainabilityPageDataInfo.GreenHostingStatus,
             ResourceGroups = resourceGroups ?? new List<ExternalResourceGroup>(),
         };
     }
@@ -154,6 +172,7 @@ public class SustainabilityService : ISustainabilityService
             TotalSize = sustainabilityResponse.TotalSize,
             TotalEmissions = sustainabilityResponse.TotalEmissions,
             CarbonRating = sustainabilityResponse.CarbonRating,
+            GreenHostingStatus = sustainabilityResponse.GreenHostingStatus,
             ResourceGroups = JsonSerializer.Serialize(sustainabilityResponse.ResourceGroups),
         };
 

@@ -21,6 +21,9 @@ public class SustainabilityResponse
     [JsonPropertyName("carbonRating")]
     public string? CarbonRating { get; set; }
 
+    [JsonPropertyName("greenHostingStatus")]
+    public string? GreenHostingStatus { get; set; }
+
     [JsonPropertyName("resourceGroups")]
     public List<ExternalResourceGroup>? ResourceGroups { get; set; }
 

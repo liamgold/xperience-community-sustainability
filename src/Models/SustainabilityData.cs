@@ -15,15 +15,27 @@ public record SustainabilityData
 
     [JsonPropertyName("resources")]
     public Resource[]? Resources { get; set; }
+
+    [JsonPropertyName("greenHostingStatus")]
+    public string? GreenHostingStatus { get; set; }
 }
 
 public record Emissions
 {
     [JsonPropertyName("co2")]
-    public double? Co2 { get; set; }
+    public Co2Result? Co2 { get; set; }
 
     [JsonPropertyName("green")]
     public bool Green { get; set; }
+}
+
+public record Co2Result
+{
+    [JsonPropertyName("total")]
+    public double? Total { get; set; }
+
+    [JsonPropertyName("rating")]
+    public string? Rating { get; set; }
 }
 
 public record Resource
