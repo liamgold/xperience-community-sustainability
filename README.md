@@ -2,7 +2,7 @@
  
 [![NuGet](https://img.shields.io/nuget/v/XperienceCommunity.Sustainability.svg)](https://www.nuget.org/packages/XperienceCommunity.Sustainability)
 [![Downloads](https://img.shields.io/nuget/dt/XperienceCommunity.Sustainability?color=cc9900)](https://www.nuget.org/packages/XperienceCommunity.Sustainability)
-[![License](https://img.shields.io/github/license/liamgold/xperience-community-sustainability)](https://github.com/liamgold/xperience-community-sustainability/blob/main/LICENSE.md)
+[![License](https://img.shields.io/badge/License-MIT-brightgreen?style=flat)](https://github.com/liamgold/xperience-community-sustainability/blob/main/LICENSE.md)
 [![CI](https://github.com/liamgold/xperience-community-sustainability/actions/workflows/ci.yml/badge.svg)](https://github.com/liamgold/xperience-community-sustainability/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/liamgold/xperience-community-sustainability?style=flat&label=stars&logo=github)](https://github.com/liamgold/xperience-community-sustainability/stargazers)
 
