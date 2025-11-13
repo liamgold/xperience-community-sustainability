@@ -38,7 +38,7 @@ public class ContentHubLinkService : IContentHubLinkService
     // Matches /getcontentasset/{contentItemGuid}/{assetGuid}
     // Guid.TryParse() handles actual GUID validation, so we just capture word characters and hyphens
     private static readonly Regex contentItemLinkRegex = new(
-        $@"\/getcontentasset\/(?<{CONTENT_ITEM_GROUP_NAME}>[\w-]+)\/[\w-]+",
+        @"\/getcontentasset\/(?<" + CONTENT_ITEM_GROUP_NAME + @">[\w-]+)\/[\w-]+",
         RegexOptions.Compiled | RegexOptions.IgnoreCase
     );
 

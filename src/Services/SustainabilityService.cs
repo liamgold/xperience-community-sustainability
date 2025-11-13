@@ -28,6 +28,9 @@ public class SustainabilityService : ISustainabilityService
     private static readonly string ScriptPath = GetScriptPath();
     private const string SustainabilityDataTestId = "sustainabilityData";
 
+    private static readonly string[] ImageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico", ".avif" };
+    private static readonly string[] FontExtensions = { ".woff", ".woff2", ".ttf", ".otf", ".eot" };
+
     private static string GetScriptPath()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
@@ -212,11 +215,11 @@ public class SustainabilityService : ISustainabilityService
         }
 
         // Extract the path without query string
-        var pathOnly = url.Split('?')[0];
+        var queryIndex = url.IndexOf('?');
+        var pathOnly = queryIndex >= 0 ? url.Substring(0, queryIndex) : url;
 
         // Check common image extensions
-        var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico", ".avif" };
-        return imageExtensions.Any(ext => pathOnly.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+        return ImageExtensions.Any(ext => pathOnly.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsFontFile(string? url)
@@ -227,11 +230,11 @@ public class SustainabilityService : ISustainabilityService
         }
 
         // Extract the path without query string
-        var pathOnly = url.Split('?')[0];
+        var queryIndex = url.IndexOf('?');
+        var pathOnly = queryIndex >= 0 ? url.Substring(0, queryIndex) : url;
 
         // Check common font extensions
-        var fontExtensions = new[] { ".woff", ".woff2", ".ttf", ".otf", ".eot" };
-        return fontExtensions.Any(ext => pathOnly.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+        return FontExtensions.Any(ext => pathOnly.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsCssFile(string? url)
@@ -242,7 +245,8 @@ public class SustainabilityService : ISustainabilityService
         }
 
         // Extract the path without query string
-        var pathOnly = url.Split('?')[0];
+        var queryIndex = url.IndexOf('?');
+        var pathOnly = queryIndex >= 0 ? url.Substring(0, queryIndex) : url;
 
         // Check for CSS extension
         return pathOnly.EndsWith(".css", StringComparison.OrdinalIgnoreCase);
