@@ -1,6 +1,5 @@
 ﻿using CMS.Core;
 using CMS.DataEngine;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
@@ -19,7 +18,6 @@ public interface ISustainabilityService
 
 public class SustainabilityService : ISustainabilityService
 {
-    private readonly IWebHostEnvironment _env;
     private readonly IEventLogService _eventLogService;
     private readonly IInfoProvider<SustainabilityPageDataInfo> _sustainabilityPageDataInfoProvider;
     private readonly IContentHubLinkService _contentHubLinkService;
@@ -28,8 +26,8 @@ public class SustainabilityService : ISustainabilityService
     private static readonly string ScriptPath = GetScriptPath();
     private const string SustainabilityDataTestId = "sustainabilityData";
 
-    private static readonly string[] ImageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico", ".avif" };
-    private static readonly string[] FontExtensions = { ".woff", ".woff2", ".ttf", ".otf", ".eot" };
+    private static readonly string[] ImageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico", ".avif"];
+    private static readonly string[] FontExtensions = [".woff", ".woff2", ".ttf", ".otf", ".eot"];
 
     private static string GetScriptPath()
     {
@@ -38,13 +36,11 @@ public class SustainabilityService : ISustainabilityService
     }
 
     public SustainabilityService(
-        IWebHostEnvironment env,
         IEventLogService eventLogService,
         IInfoProvider<SustainabilityPageDataInfo> sustainabilityPageDataInfoProvider,
         IContentHubLinkService contentHubLinkService,
         IOptions<SustainabilityOptions> options)
     {
-        _env = env;
         _eventLogService = eventLogService;
         _sustainabilityPageDataInfoProvider = sustainabilityPageDataInfoProvider;
         _contentHubLinkService = contentHubLinkService;
@@ -187,7 +183,7 @@ public class SustainabilityService : ISustainabilityService
             TotalEmissions = sustainabilityPageDataInfo.TotalEmissions,
             CarbonRating = sustainabilityPageDataInfo.CarbonRating,
             GreenHostingStatus = sustainabilityPageDataInfo.GreenHostingStatus,
-            ResourceGroups = resourceGroups ?? new List<ExternalResourceGroup>(),
+            ResourceGroups = resourceGroups ?? [],
         };
     }
 
