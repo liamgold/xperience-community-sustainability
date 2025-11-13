@@ -1,12 +1,12 @@
-using System.Text.RegularExpressions;
 using CMS.ContentEngine;
 using CMS.ContentEngine.Internal;
 using CMS.Core;
 using CMS.DataEngine;
-using CMS.Membership;
+using CMS.Helpers.Internal;
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.Base.Authentication;
 using Kentico.Xperience.Admin.Base.UIPages;
+using System.Text.RegularExpressions;
 
 namespace XperienceCommunity.Sustainability.Services;
 
@@ -34,29 +34,32 @@ public interface IContentHubLinkService
 public class ContentHubLinkService : IContentHubLinkService
 {
     private const string CONTENT_ITEM_GROUP_NAME = "ContentItemGuid";
-    private const string GUID_REGEX = @"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
-    // Updated regex to handle both absolute URLs (https://...) and relative paths (/getcontentasset/...)
-    private readonly Regex contentItemLinkRegex = new(
-        @$"\/getcontentasset\/(?<{CONTENT_ITEM_GROUP_NAME}>{GUID_REGEX})\/{GUID_REGEX}",
+    // Matches /getcontentasset/{contentItemGuid}/{assetGuid}
+    // Guid.TryParse() handles actual GUID validation, so we just capture word characters and hyphens
+    private static readonly Regex contentItemLinkRegex = new(
+        $@"\/getcontentasset\/(?<{CONTENT_ITEM_GROUP_NAME}>[\w-]+)\/[\w-]+",
         RegexOptions.Compiled | RegexOptions.IgnoreCase
     );
 
-    private readonly IEventLogService eventLogService;
-    private readonly IPageLinkGenerator pageLinkGenerator;
-    private readonly IContentItemManagerFactory contentItemManagerFactory;
-    private readonly IAuthenticatedUserAccessor userAccessor;
+    private readonly IEventLogService _eventLogService;
+    private readonly IPageLinkGenerator _pageLinkGenerator;
+    private readonly IContentItemManagerFactory _contentItemManagerFactory;
+    private readonly IAuthenticatedUserAccessor _userAccessor;
+    private readonly IInfoProvider<ContentItemInfo> _contentItemInfoProvider;
 
     public ContentHubLinkService(
         IEventLogService eventLogService,
         IPageLinkGenerator pageLinkGenerator,
         IContentItemManagerFactory contentItemManagerFactory,
-        IAuthenticatedUserAccessor userAccessor)
+        IAuthenticatedUserAccessor userAccessor,
+        IInfoProvider<ContentItemInfo> contentItemInfoProvider)
     {
-        this.eventLogService = eventLogService;
-        this.pageLinkGenerator = pageLinkGenerator;
-        this.contentItemManagerFactory = contentItemManagerFactory;
-        this.userAccessor = userAccessor;
+        _eventLogService = eventLogService;
+        _pageLinkGenerator = pageLinkGenerator;
+        _contentItemManagerFactory = contentItemManagerFactory;
+        _userAccessor = userAccessor;
+        _contentItemInfoProvider = contentItemInfoProvider;
     }
 
     public Guid? TryExtractContentItemGuid(string resourceUrl)
@@ -76,7 +79,7 @@ public class ContentHubLinkService : IContentHubLinkService
         // Extract the content item GUID
         if (!Guid.TryParse(match.Groups[CONTENT_ITEM_GROUP_NAME].Value, out var contentItemGuid))
         {
-            eventLogService.LogWarning(
+            _eventLogService.LogWarning(
                 nameof(ContentHubLinkService),
                 "INVALID_GUID",
                 $"Failed to parse GUID from: {match.Groups[CONTENT_ITEM_GROUP_NAME].Value}");
@@ -88,52 +91,51 @@ public class ContentHubLinkService : IContentHubLinkService
 
     public async Task<string?> GenerateContentHubUrl(Guid contentItemGuid, string languageName)
     {
-        eventLogService.LogInformation(
-            nameof(ContentHubLinkService),
-            "PROCESSING",
-            $"Generating Content Hub URL for: GUID={contentItemGuid}, Language={languageName}");
-
         try
         {
-            // Simple database query to get ContentItemID by GUID
-            var parameters = new QueryDataParameters();
-            parameters.Add("@ContentItemGUID", contentItemGuid);
+            // Query using proper Kentico API - only select the column we need
+            var results = await _contentItemInfoProvider
+                .Get()
+                .Columns(nameof(ContentItemInfo.ContentItemID))
+                .WhereEquals(nameof(ContentItemInfo.ContentItemGUID), contentItemGuid)
+                .TopN(1)
+                .GetEnumerableTypedResultAsync();
 
-            var query = "SELECT TOP 1 ContentItemID, ContentItemName FROM CMS_ContentItem WHERE ContentItemGUID = @ContentItemGUID";
-            var dataSet = ConnectionHelper.ExecuteQuery(query, parameters, QueryTypeEnum.SQLQuery);
+            var contentItem = results.FirstOrDefault();
 
-            if (dataSet == null || dataSet.Tables.Count == 0 || dataSet.Tables[0].Rows.Count == 0)
+            if (contentItem == null)
             {
-                eventLogService.LogWarning(
+                _eventLogService.LogWarning(
                     nameof(ContentHubLinkService),
                     "NOT_FOUND",
                     $"Content item not found: GUID={contentItemGuid}");
                 return null;
             }
 
-            var row = dataSet.Tables[0].Rows[0];
-            var contentItemId = Convert.ToInt32(row["ContentItemID"]);
-            var contentItemName = row["ContentItemName"]?.ToString() ?? "Unknown";
+            var contentItemId = contentItem.ContentItemID;
 
             // Get workspace ID from content item metadata using proper API
-            var user = await userAccessor.Get();
-            var manager = contentItemManagerFactory.Create(user.UserID);
+            var user = await _userAccessor.Get();
+            var manager = _contentItemManagerFactory.Create(user.UserID);
             var metadata = await manager.GetContentItemMetadata(contentItemId, CancellationToken.None);
 
-            // Construct Content Hub URL
-            // URL format: /admin/content-hub/{workspaceId}/{language}/all/list/{contentItemId}/content
-            var url = $"/admin/content-hub/{metadata.WorkspaceId}/{languageName}/{ContentHubSlugs.ALL_CONTENT_ITEMS}/list/{contentItemId}/content";
+            var parameters = new PageParameterValues
+            {
+                { typeof(ContentHubWorkspace), metadata.WorkspaceId },
+                { typeof(ContentHubContentLanguage), languageName },
+                { typeof(ContentHubFolder), ContentHubSlugs.ALL_CONTENT_ITEMS },
+                { typeof(ContentItemEditSection), contentItemId },
+            };
 
-            eventLogService.LogInformation(
-                nameof(ContentHubLinkService),
-                "SUCCESS",
-                $"Generated Content Hub URL for item {contentItemId} (Name: {contentItemName}, Workspace: {metadata.WorkspaceId})");
+            var contentItemPath = _pageLinkGenerator.GetPath<ContentItemEdit>(parameters);
+
+            var url = $"/{AdminPathDefaults.ADMIN_PATH}{contentItemPath}";
 
             return url;
         }
         catch (Exception ex)
         {
-            eventLogService.LogException(
+            _eventLogService.LogException(
                 nameof(ContentHubLinkService),
                 "ERROR",
                 ex,
