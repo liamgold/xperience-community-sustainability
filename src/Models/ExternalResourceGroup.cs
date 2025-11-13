@@ -44,12 +44,12 @@ public enum ResourceGroupType
 {
     [Display(Name = "Images")]
     Images,
+    [Display(Name = "CSS")]
+    Css,
     [Display(Name = "Scripts")]
     Scripts,
     [Display(Name = "Links")]
     Links,
-    [Display(Name = "CSS")]
-    Css,
     [Display(Name = "Other")]
     Other
 }

@@ -22,6 +22,7 @@ public class SustainabilityService : ISustainabilityService
     private readonly IWebHostEnvironment _env;
     private readonly IEventLogService _eventLogService;
     private readonly IInfoProvider<SustainabilityPageDataInfo> _sustainabilityPageDataInfoProvider;
+    private readonly IContentHubLinkService _contentHubLinkService;
     private readonly SustainabilityOptions _options;
 
     private static readonly string ScriptPath = GetScriptPath();
@@ -37,11 +38,13 @@ public class SustainabilityService : ISustainabilityService
         IWebHostEnvironment env,
         IEventLogService eventLogService,
         IInfoProvider<SustainabilityPageDataInfo> sustainabilityPageDataInfoProvider,
+        IContentHubLinkService contentHubLinkService,
         IOptions<SustainabilityOptions> options)
     {
         _env = env;
         _eventLogService = eventLogService;
         _sustainabilityPageDataInfoProvider = sustainabilityPageDataInfoProvider;
+        _contentHubLinkService = contentHubLinkService;
         _options = options.Value;
     }
 
@@ -106,7 +109,7 @@ public class SustainabilityService : ISustainabilityService
             }
 
             var resourceGroups = Enum.GetValues<ResourceGroupType>()
-                .Select(type => GetExternalResourceGroup(type, sustainabilityData.Resources))
+                .Select(type => GetExternalResourceGroup(type, sustainabilityData.Resources, languageName))
                 .ToList();
 
             var sustainabilityResponse = new SustainabilityResponse(DateTime.UtcNow)
@@ -152,6 +155,28 @@ public class SustainabilityService : ISustainabilityService
 
         var resourceGroups = JsonSerializer.Deserialize<List<ExternalResourceGroup>>(sustainabilityPageDataInfo.ResourceGroups);
 
+        // Regenerate Content Hub URLs from stored GUIDs (ensures URLs are current)
+        if (resourceGroups != null)
+        {
+            foreach (var group in resourceGroups)
+            {
+                if (group.Resources == null)
+                {
+                    continue;
+                }
+
+                foreach (var resource in group.Resources)
+                {
+                    if (resource.ContentItemGuid.HasValue)
+                    {
+                        resource.ContentHubUrl = await _contentHubLinkService.GenerateContentHubUrl(
+                            resource.ContentItemGuid.Value,
+                            languageName);
+                    }
+                }
+            }
+        }
+
         return new SustainabilityResponse(sustainabilityPageDataInfo.DateCreated)
         {
             TotalSize = sustainabilityPageDataInfo.TotalSize,
@@ -179,10 +204,94 @@ public class SustainabilityService : ISustainabilityService
         await _sustainabilityPageDataInfoProvider.SetAsync(infoObject);
     }
 
-    private static ExternalResourceGroup GetExternalResourceGroup(ResourceGroupType groupType, IList<Resource> resources)
+    private static bool IsImageFile(string? url)
+    {
+        if (string.IsNullOrEmpty(url))
+        {
+            return false;
+        }
+
+        // Extract the path without query string
+        var pathOnly = url.Split('?')[0];
+
+        // Check common image extensions
+        var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico", ".avif" };
+        return imageExtensions.Any(ext => pathOnly.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsFontFile(string? url)
+    {
+        if (string.IsNullOrEmpty(url))
+        {
+            return false;
+        }
+
+        // Extract the path without query string
+        var pathOnly = url.Split('?')[0];
+
+        // Check common font extensions
+        var fontExtensions = new[] { ".woff", ".woff2", ".ttf", ".otf", ".eot" };
+        return fontExtensions.Any(ext => pathOnly.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsCssFile(string? url)
+    {
+        if (string.IsNullOrEmpty(url))
+        {
+            return false;
+        }
+
+        // Extract the path without query string
+        var pathOnly = url.Split('?')[0];
+
+        // Check for CSS extension
+        return pathOnly.EndsWith(".css", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private ExternalResourceGroup GetExternalResourceGroup(ResourceGroupType groupType, IList<Resource> resources, string languageName)
     {
         var initiator = ExternalResourceGroup.GetInitiatorType(groupType);
-        var resourcesByType = resources.Where(x => !string.IsNullOrEmpty(x.InitiatorType) && x.InitiatorType.Equals(initiator) && x.TransferSize > 0);
+
+        // Filter resources - prioritize file extensions over initiatorType
+        var resourcesByType = resources.Where(x =>
+        {
+            if (string.IsNullOrEmpty(x.InitiatorType) || x.TransferSize <= 0)
+            {
+                return false;
+            }
+
+            // Check file extension first (more reliable than initiatorType)
+            var isImage = IsImageFile(x.Name);
+            var isFont = IsFontFile(x.Name);
+            var isCss = IsCssFile(x.Name);
+
+            // Images: include image files regardless of initiatorType (e.g., CSS background images)
+            if (groupType == ResourceGroupType.Images && isImage)
+            {
+                return true;
+            }
+
+            // Other: include font files (no dedicated Fonts category)
+            if (groupType == ResourceGroupType.Other && isFont)
+            {
+                return true;
+            }
+
+            // CSS: include CSS files regardless of initiatorType
+            if (groupType == ResourceGroupType.Css && isCss)
+            {
+                return true;
+            }
+
+            // Exclude files already categorized by extension from other groups
+            if (isImage || isFont || isCss)
+            {
+                return false;
+            }
+
+            // Fallback to initiatorType for remaining resources
+            return x.InitiatorType.Equals(initiator);
+        });
 
         var transferSize = 0;
         var resourceList = new List<ExternalResource>();
@@ -194,7 +303,16 @@ public class SustainabilityService : ISustainabilityService
             }
 
             transferSize += resource.TransferSize.GetValueOrDefault();
-            resourceList.Add(new ExternalResource(resource.Name, (resource.TransferSize ?? 0) / 1024m));
+
+            // Try to extract Content Item GUID for this resource (for later URL generation)
+            var contentItemGuid = _contentHubLinkService.TryExtractContentItemGuid(resource.Name);
+
+            var externalResource = new ExternalResource(resource.Name, (resource.TransferSize ?? 0) / 1024m)
+            {
+                ContentItemGuid = contentItemGuid
+            };
+
+            resourceList.Add(externalResource);
         }
 
         return new ExternalResourceGroup(groupType)
