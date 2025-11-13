@@ -34,7 +34,11 @@ type SustainabilityData = {
   greenHostingStatus?: string;
 };
 
-type ExternalResource = { url: string; size: number };
+type ExternalResource = {
+  url: string;
+  size: number;
+  contentHubUrl?: string;
+};
 
 type ExternalResourceGroup = {
   type: string;
@@ -321,6 +325,33 @@ const ResourceGroupCard = ({
                   <div style={resourceGroupCardStyles.resourceInfo}>
                     <div style={resourceGroupCardStyles.fileName}>
                       {fileName}
+                      {resource.contentHubUrl && (
+                        <a
+                          href={resource.contentHubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="View in Content Hub"
+                          style={{
+                            marginLeft: "8px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            verticalAlign: "top",
+                            textDecoration: "none",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                            color: "var(--color-text-secondary)",
+                            opacity: 0.7,
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.opacity = "1";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.opacity = "0.7";
+                          }}
+                        >
+                          <Icon name="xp-arrow-right-top-square" />
+                        </a>
+                      )}
                     </div>
                     <div style={resourceGroupCardStyles.filePath} title={path}>
                       {path}
@@ -679,7 +710,11 @@ export const SustainabilityTabTemplate = (
           </Headline>
           <Stack spacing={Spacing.L}>
             {data.resourceGroups
-              .sort((a, b) => b.totalSize - a.totalSize)
+              .sort((a, b) => {
+                // Sort by logical category order: Images, CSS, Scripts, Links, Other
+                const order = ['Images', 'CSS', 'Scripts', 'Links', 'Other'];
+                return order.indexOf(a.name) - order.indexOf(b.name);
+              })
               .map((group) => (
                 <ResourceGroupCard key={group.type} group={group} totalPageSize={data.totalSize} />
               ))}
