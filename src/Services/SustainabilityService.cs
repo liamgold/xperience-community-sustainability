@@ -111,9 +111,10 @@ public class SustainabilityService : ISustainabilityService
                 return null;
             }
 
-            var resourceGroups = Enum.GetValues<ResourceGroupType>()
-                .Select(type => GetExternalResourceGroup(type, sustainabilityData.Resources, languageName))
-                .ToList();
+            var resourceGroupTasks = Enum.GetValues<ResourceGroupType>()
+                .Select(type => GetExternalResourceGroup(type, sustainabilityData.Resources, languageName));
+
+            var resourceGroups = (await Task.WhenAll(resourceGroupTasks)).ToList();
 
             var sustainabilityResponse = new SustainabilityResponse(DateTime.UtcNow)
             {
@@ -252,7 +253,7 @@ public class SustainabilityService : ISustainabilityService
         return pathOnly.EndsWith(".css", StringComparison.OrdinalIgnoreCase);
     }
 
-    private ExternalResourceGroup GetExternalResourceGroup(ResourceGroupType groupType, IList<Resource> resources, string languageName)
+    private async Task<ExternalResourceGroup> GetExternalResourceGroup(ResourceGroupType groupType, IList<Resource> resources, string languageName)
     {
         var initiator = ExternalResourceGroup.GetInitiatorType(groupType);
 
@@ -308,12 +309,19 @@ public class SustainabilityService : ISustainabilityService
 
             transferSize += resource.TransferSize.GetValueOrDefault();
 
-            // Try to extract Content Item GUID for this resource (for later URL generation)
+            // Try to extract Content Item GUID and generate Content Hub URL
             var contentItemGuid = _contentHubLinkService.TryExtractContentItemGuid(resource.Name);
+            string? contentHubUrl = null;
+
+            if (contentItemGuid.HasValue)
+            {
+                contentHubUrl = await _contentHubLinkService.GenerateContentHubUrl(contentItemGuid.Value, languageName);
+            }
 
             var externalResource = new ExternalResource(resource.Name, (resource.TransferSize ?? 0) / 1024m)
             {
-                ContentItemGuid = contentItemGuid
+                ContentItemGuid = contentItemGuid,
+                ContentHubUrl = contentHubUrl
             };
 
             resourceList.Add(externalResource);
