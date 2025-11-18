@@ -35,7 +35,20 @@ C:\Projects\xperience-community-sustainability\
 │   ├── Client/                             # React/TypeScript frontend
 │   │   └── src/
 │   │       ├── Sustainability/
-│   │       │   └── SustainabilityTabTemplate.tsx  # Main React UI component
+│   │       │   ├── utils.ts                 # Shared utilities (rating colors, resource icons, hosting status)
+│   │       │   ├── tab-template/            # Sustainability Tab (page-level) components
+│   │       │   │   ├── types.ts             # Tab-specific types and commands
+│   │       │   │   ├── SustainabilityTabTemplate.tsx  # Main orchestrator component
+│   │       │   │   ├── current/             # Current report view
+│   │       │   │   │   ├── CurrentReportView.tsx  # Current report display
+│   │       │   │   │   ├── StatCard.tsx     # Metric display card
+│   │       │   │   │   └── ResourceGroupCard.tsx  # Resource list with expand/collapse
+│   │       │   │   └── history/             # Historical reports view
+│   │       │   │       ├── HistoryView.tsx  # History view display
+│   │       │   │       ├── TrendChart.tsx   # SVG line chart for emissions/size trends
+│   │       │   │       └── HistoricalReportCard.tsx  # Collapsible historical report card
+│   │       │   └── dashboard-template/      # Dashboard (planned feature)
+│   │       │       └── SustainabilityDashboardTemplate.tsx
 │   │       └── entry.tsx                   # Module exports
 │   ├── Models/                             # Data structures
 │   │   ├── SustainabilityResponse.cs       # API response model
@@ -73,9 +86,15 @@ C:\Projects\xperience-community-sustainability\
   - Injects `resource-checker.js` script
   - Waits for results (60s timeout - line 60)
   - Saves report to database
+  - Generates Content Hub URLs for image resources
 
 - `GetLastReport(int webPageItemID, string languageName)` - Line 103
   - Retrieves most recent sustainability report from database
+
+- `GetReportHistory(int webPageItemID, string languageName, int limit = 10, int offset = 0)` - Line 192
+  - Retrieves paginated historical reports for a page
+  - Returns reports ordered by DateCreated descending
+  - Regenerates Content Hub URLs for each historical report
 
 **Important Details**:
 - Registered as **Singleton** (line 20 in SustainabilityServiceCollectionExtensions.cs)
@@ -92,32 +111,52 @@ C:\Projects\xperience-community-sustainability\
 - Template: `@sustainability/web-admin/SustainabilityTab`
 - Order: 20000 (appears near end of tabs)
 
-**Key Method**:
-- `RunReport()` - Line 67: PageCommand that triggers new sustainability analysis
+**Key Methods**:
+- `RunReport()` - Line 67: PageCommand that triggers new sustainability analysis and returns updated historical reports
+- `LoadMoreHistory(int offset)` - Line 93: PageCommand that loads additional historical reports with pagination
 
-### 3. React Frontend (src/Client/src/Sustainability/SustainabilityTabTemplate.tsx)
+### 3. React Frontend (src/Client/src/Sustainability/tab-template/)
 
-**UI Design**: Modern dashboard-style layout using native XbyK components and custom styled components.
+**Architecture**: Component-based architecture with toggle view pattern, organized by current/history views.
+
+**Main Orchestrator** (`SustainabilityTabTemplate.tsx`):
+- Manages state for current report, historical reports, and view toggling
+- Handles PageCommands: `RunReport`, `LoadMoreHistory`
+- Renders either `CurrentReportView` or `HistoryView` based on `showHistory` state
+- Header adapts: "Sustainability Report" vs "Report History" with corresponding buttons
 
 **UI States**:
 1. **No data + Available**: Shows "Run Analysis" button in centered card
 2. **No data + Not Available**: Shows unavailable message (root pages/folders)
-3. **Data loaded**: Displays comprehensive dashboard with hero carbon rating
+3. **Data loaded - Current View**: Displays comprehensive dashboard with hero carbon rating
+4. **Data loaded - History View**: Shows trend chart and historical report list with pagination
 
-**Key Features**:
+**Current Report View** (`current/CurrentReportView.tsx`):
 - **Hero Carbon Rating Section** - Large 120px rating letter with gradient background themed by rating color, includes link to SWDM v4 methodology
 - **Stat Cards Grid** - 2x2 grid showing CO₂ Emissions, Page Weight, Resources count, and Efficiency rating
-- **Green Hosting Info Banner** - Displays hosting status (Green/Standard/Unknown) with color-coded badge between hero and resources
-- **Collapsible Resource Lists** - Shows 3 resources by default with "Show X more" button
-- **Resource Breakdown** - Sorted by size (largest first) with filename/path separation
-- **Percentage Badges** - Shows what % of total page weight each resource group represents
+- **Green Hosting Info Banner** - Displays hosting status (Green/Standard/Unknown) with color-coded badge
+- **Resource Breakdown** - Groups resources by type (Images, CSS, Scripts, Links, Other)
 - **Optimization Tips** - XbyK-specific features (Image Variants, AIRA) plus general web performance tips
-- **Loading states** - Built into XbyK Button component with `inProgress` prop
-- **Responsive layout** - Uses XbyK Row/Column with `colsLg`/`colsMd` breakpoints
 
-**Components Used**:
-- XbyK Native: `Card`, `Button`, `Stack`, `Row`, `Column`, `Headline`, `Spacing`
-- Custom: `StatCard`, `ResourceGroupCard` (with expand/collapse state)
+**History View** (`history/HistoryView.tsx`):
+- **Trend Chart** - Custom SVG line chart showing CO₂ emissions and page weight trends over last 10 reports with dual Y-axes
+- **Historical Report Cards** - Collapsible cards showing date, rating, metrics, and top 3 resource groups when expanded
+- **Load More Pagination** - Button to load additional historical reports (10 at a time)
+
+**Shared Components**:
+- **StatCard** (`current/StatCard.tsx`) - Reusable metric display card
+- **ResourceGroupCard** (`current/ResourceGroupCard.tsx`) - Resource list with expand/collapse, shows 3 resources by default with "Show X more" button, includes Content Hub deep links
+- **TrendChart** (`history/TrendChart.tsx`) - SVG-based dual-axis line chart
+- **HistoricalReportCard** (`history/HistoricalReportCard.tsx`) - Collapsible historical report with badge, metrics, and resource preview
+
+**XbyK Components Used**:
+- Native: `Card`, `Button`, `Stack`, `Row`, `Column`, `Headline`, `Spacing`, `Icon`
+- Patterns: `usePageCommand` hook for backend commands, `inProgress` prop for loading states
+- Responsive: `colsLg`/`colsMd` breakpoints for grid layout
+
+**File Organization**:
+- `tab-template/types.ts` - All tab-specific types (SustainabilityData, PageAvailabilityStatus, Commands)
+- `utils.ts` (shared) - Rating colors/descriptions, resource type icons/colors, hosting status display helper
 
 ### 4. JavaScript Analysis (src/wwwroot/scripts/resource-checker.js)
 

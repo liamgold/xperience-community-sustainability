@@ -60,6 +60,10 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
 
         properties.SustainabilityData = await _sustainabilityService.GetLastReport(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
 
+        // Load initial historical reports (skip the first one since it's the current report)
+        var history = await _sustainabilityService.GetReportHistory(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName, limit: 11, offset: 0);
+        properties.HistoricalReports = history.Skip(1).ToList();
+
         return properties;
     }
 
@@ -76,20 +80,40 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
             throw new InvalidOperationException("Failed to generate sustainability report. Check the event log for details.");
         }
 
+        // Load updated historical reports (skip the first one since it's the current report we just created)
+        var history = await _sustainabilityService.GetReportHistory(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName, limit: 11, offset: 0);
+        var historicalReports = history.Skip(1).ToList();
+
         return new SustainabilityResponseResult
         {
             SustainabilityData = sustainabilityData,
+            HistoricalReports = historicalReports,
+        };
+    }
+
+    [PageCommand]
+    public async Task<HistoricalReportsResult> LoadMoreHistory(int offset)
+    {
+        var history = await _sustainabilityService.GetReportHistory(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName, limit: 10, offset: offset);
+
+        return new HistoricalReportsResult
+        {
+            HistoricalReports = history.ToList(),
         };
     }
 }
 
-public readonly record struct SustainabilityResponseResult(SustainabilityResponse? SustainabilityData);
+public readonly record struct SustainabilityResponseResult(SustainabilityResponse? SustainabilityData, List<SustainabilityResponse> HistoricalReports);
+
+public readonly record struct HistoricalReportsResult(List<SustainabilityResponse> HistoricalReports);
 
 public sealed class SustainabilityTabProperties : TemplateClientProperties
 {
     public PageAvailabilityStatus PageAvailability { get; set; }
 
     public SustainabilityResponse? SustainabilityData { get; set; }
+
+    public List<SustainabilityResponse> HistoricalReports { get; set; } = [];
 }
 
 public enum PageAvailabilityStatus

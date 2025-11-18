@@ -13,6 +13,8 @@ public interface ISustainabilityService
 {
     Task<SustainabilityResponse?> GetLastReport(int webPageItemID, string languageName);
 
+    Task<IEnumerable<SustainabilityResponse>> GetReportHistory(int webPageItemID, string languageName, int limit = 10, int offset = 0);
+
     Task<SustainabilityResponse?> RunNewReport(string url, int webPageItemID, string languageName);
 }
 
@@ -185,6 +187,56 @@ public class SustainabilityService : ISustainabilityService
             GreenHostingStatus = sustainabilityPageDataInfo.GreenHostingStatus,
             ResourceGroups = resourceGroups ?? [],
         };
+    }
+
+    public async Task<IEnumerable<SustainabilityResponse>> GetReportHistory(int webPageItemID, string languageName, int limit = 10, int offset = 0)
+    {
+        var sustainabilityPageDataInfos = await _sustainabilityPageDataInfoProvider.Get()
+            .WhereEquals(nameof(SustainabilityPageDataInfo.WebPageItemID), webPageItemID)
+            .WhereEquals(nameof(SustainabilityPageDataInfo.LanguageName), languageName)
+            .OrderByDescending(nameof(SustainabilityPageDataInfo.DateCreated))
+            .Page(offset, limit)
+            .GetEnumerableTypedResultAsync();
+
+        var responses = new List<SustainabilityResponse>();
+
+        foreach (var sustainabilityPageDataInfo in sustainabilityPageDataInfos)
+        {
+            var resourceGroups = JsonSerializer.Deserialize<List<ExternalResourceGroup>>(sustainabilityPageDataInfo.ResourceGroups);
+
+            // Regenerate Content Hub URLs from stored GUIDs (ensures URLs are current)
+            if (resourceGroups != null)
+            {
+                foreach (var group in resourceGroups)
+                {
+                    if (group.Resources == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var resource in group.Resources)
+                    {
+                        if (resource.ContentItemGuid.HasValue)
+                        {
+                            resource.ContentHubUrl = await _contentHubLinkService.GenerateContentHubUrl(
+                                resource.ContentItemGuid.Value,
+                                languageName);
+                        }
+                    }
+                }
+            }
+
+            responses.Add(new SustainabilityResponse(sustainabilityPageDataInfo.DateCreated)
+            {
+                TotalSize = sustainabilityPageDataInfo.TotalSize,
+                TotalEmissions = sustainabilityPageDataInfo.TotalEmissions,
+                CarbonRating = sustainabilityPageDataInfo.CarbonRating,
+                GreenHostingStatus = sustainabilityPageDataInfo.GreenHostingStatus,
+                ResourceGroups = resourceGroups ?? [],
+            });
+        }
+
+        return responses;
     }
 
     private async Task LogSustainabilityResponse(SustainabilityResponse sustainabilityResponse, int webPageItemID, string languageName)
