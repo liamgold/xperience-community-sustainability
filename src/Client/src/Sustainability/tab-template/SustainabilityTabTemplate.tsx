@@ -35,8 +35,10 @@ export const SustainabilityTabTemplate = (
     null
   );
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMoreHistory, setHasMoreHistory] = useState(true);
+  // Initialize hasMoreHistory from backend
+  const [hasMoreHistory, setHasMoreHistory] = useState(props?.hasMoreHistory ?? false);
   const [showHistory, setShowHistory] = useState(false);
+  const [nextPageIndex, setNextPageIndex] = useState(1); // Initial load got page 0, next is page 1
 
   const { execute: submit } = usePageCommand<SustainabilityTabTemplateProps>(
     Commands.RunReport,
@@ -48,6 +50,9 @@ export const SustainabilityTabTemplate = (
         // Reload historical reports after running new report
         if (response?.historicalReports) {
           setHistoricalReports(response.historicalReports);
+          setNextPageIndex(1); // Reset to page 1
+          // Set hasMoreHistory from backend response
+          setHasMoreHistory(response.hasMoreHistory ?? false);
         }
       },
       onError: (err) => {
@@ -58,9 +63,10 @@ export const SustainabilityTabTemplate = (
     }
   );
 
-  const { execute: loadMoreHistory } = usePageCommand<{
-    historicalReports: SustainabilityData[];
-  }>(Commands.LoadMoreHistory, {
+  const { execute: loadMoreHistory } = usePageCommand<
+    { historicalReports: SustainabilityData[]; hasMoreHistory: boolean },
+    { pageIndex: number }
+  >(Commands.LoadMoreHistory, {
     after: (response) => {
       if (
         response?.historicalReports &&
@@ -70,11 +76,10 @@ export const SustainabilityTabTemplate = (
           ...prev,
           ...response.historicalReports,
         ]);
+        setNextPageIndex((prev) => prev + 1); // Increment to next page
         setIsLoadingMore(false);
-        // If we got fewer than 10 reports, we've reached the end
-        if (response.historicalReports.length < 10) {
-          setHasMoreHistory(false);
-        }
+        // Set hasMoreHistory from backend response
+        setHasMoreHistory(response.hasMoreHistory ?? false);
       } else {
         setHasMoreHistory(false);
         setIsLoadingMore(false);
@@ -253,7 +258,9 @@ export const SustainabilityTabTemplate = (
             expandedReportIndex={expandedReportIndex}
             setExpandedReportIndex={setExpandedReportIndex}
             isLoadingMore={isLoadingMore}
+            setIsLoadingMore={setIsLoadingMore}
             hasMoreHistory={hasMoreHistory}
+            nextPageIndex={nextPageIndex}
             loadMoreHistory={loadMoreHistory}
           />
         )}

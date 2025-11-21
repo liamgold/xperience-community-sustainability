@@ -29,6 +29,7 @@ export interface SustainabilityTabTemplateProps {
   pageAvailability: PageAvailabilityStatus;
   sustainabilityData: SustainabilityData;
   historicalReports: SustainabilityData[];
+  hasMoreHistory?: boolean;
 }
 
 export const Commands = {

@@ -11,7 +11,8 @@ interface HistoryViewProps {
   setExpandedReportIndex: (index: number | null) => void;
   isLoadingMore: boolean;
   hasMoreHistory: boolean;
-  loadMoreHistory: (params: { offset: number }) => void;
+  nextPageIndex: number;
+  loadMoreHistory: (data: { pageIndex: number }) => void;
 }
 
 export const HistoryView = ({
@@ -21,6 +22,7 @@ export const HistoryView = ({
   setExpandedReportIndex,
   isLoadingMore,
   hasMoreHistory,
+  nextPageIndex,
   loadMoreHistory,
 }: HistoryViewProps) => (
   <>
@@ -50,7 +52,7 @@ export const HistoryView = ({
             disabled={isLoadingMore}
             inProgress={isLoadingMore}
             onClick={() => {
-              loadMoreHistory({ offset: historicalReports.length + 1 });
+              loadMoreHistory({ pageIndex: nextPageIndex });
             }}
           />
         </div>

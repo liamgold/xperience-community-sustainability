@@ -60,9 +60,16 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
 
         properties.SustainabilityData = await _sustainabilityService.GetLastReport(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
 
-        // Load initial historical reports (skip the first one since it's the current report)
-        var history = await _sustainabilityService.GetReportHistory(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName, limit: 11, offset: 0);
-        properties.HistoricalReports = history.Skip(1).ToList();
+        // Load initial historical reports (exclude the current report)
+        var currentReportId = properties.SustainabilityData?.SustainabilityPageDataID;
+        var (reports, hasMore) = await _sustainabilityService.GetReportHistory(
+            WebPageIdentifier.WebPageItemID,
+            WebPageIdentifier.LanguageName,
+            excludeReportId: currentReportId,
+            limit: 10,
+            pageIndex: 0);
+        properties.HistoricalReports = reports.ToList();
+        properties.HasMoreHistory = hasMore;
 
         return properties;
     }
@@ -80,32 +87,53 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
             throw new InvalidOperationException("Failed to generate sustainability report. Check the event log for details.");
         }
 
-        // Load updated historical reports (skip the first one since it's the current report we just created)
-        var history = await _sustainabilityService.GetReportHistory(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName, limit: 11, offset: 0);
-        var historicalReports = history.Skip(1).ToList();
+        // Load updated historical reports (exclude the current report we just created)
+        var currentReportId = sustainabilityData?.SustainabilityPageDataID;
+        var (reports, hasMore) = await _sustainabilityService.GetReportHistory(
+            WebPageIdentifier.WebPageItemID,
+            WebPageIdentifier.LanguageName,
+            excludeReportId: currentReportId,
+            limit: 10,
+            pageIndex: 0);
 
         return new SustainabilityResponseResult
         {
             SustainabilityData = sustainabilityData,
-            HistoricalReports = historicalReports,
+            HistoricalReports = reports.ToList(),
+            HasMoreHistory = hasMore,
         };
     }
 
     [PageCommand]
-    public async Task<HistoricalReportsResult> LoadMoreHistory(int offset)
+    public async Task<HistoricalReportsResult> LoadMoreHistory(LoadMoreHistoryCommandData commandData)
     {
-        var history = await _sustainabilityService.GetReportHistory(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName, limit: 10, offset: offset);
+        // Get current report ID to exclude from history
+        var currentReport = await _sustainabilityService.GetLastReport(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
+        var currentReportId = currentReport?.SustainabilityPageDataID;
+
+        var (reports, hasMore) = await _sustainabilityService.GetReportHistory(
+            WebPageIdentifier.WebPageItemID,
+            WebPageIdentifier.LanguageName,
+            excludeReportId: currentReportId,
+            limit: 10,
+            pageIndex: commandData?.PageIndex ?? 0);
 
         return new HistoricalReportsResult
         {
-            HistoricalReports = history.ToList(),
+            HistoricalReports = reports.ToList(),
+            HasMoreHistory = hasMore,
         };
     }
 }
 
-public readonly record struct SustainabilityResponseResult(SustainabilityResponse? SustainabilityData, List<SustainabilityResponse> HistoricalReports);
+public readonly record struct SustainabilityResponseResult(SustainabilityResponse? SustainabilityData, List<SustainabilityResponse> HistoricalReports, bool HasMoreHistory);
 
-public readonly record struct HistoricalReportsResult(List<SustainabilityResponse> HistoricalReports);
+public readonly record struct HistoricalReportsResult(List<SustainabilityResponse> HistoricalReports, bool HasMoreHistory);
+
+public class LoadMoreHistoryCommandData
+{
+    public int PageIndex { get; set; }
+}
 
 public sealed class SustainabilityTabProperties : TemplateClientProperties
 {
@@ -114,6 +142,8 @@ public sealed class SustainabilityTabProperties : TemplateClientProperties
     public SustainabilityResponse? SustainabilityData { get; set; }
 
     public List<SustainabilityResponse> HistoricalReports { get; set; } = [];
+
+    public bool HasMoreHistory { get; set; }
 }
 
 public enum PageAvailabilityStatus

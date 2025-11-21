@@ -9,6 +9,9 @@ public class SustainabilityResponse
         DateCreated = dateCreated;
     }
 
+    [JsonIgnore]
+    public int SustainabilityPageDataID { get; set; }
+
     [JsonPropertyName("lastRunDate")]
     public string LastRunDate => DateCreated.ToString("MMMM dd, yyyy h:mm tt");
 
