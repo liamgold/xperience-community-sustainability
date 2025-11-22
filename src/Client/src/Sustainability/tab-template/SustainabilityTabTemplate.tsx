@@ -228,6 +228,7 @@ export const SustainabilityTabTemplate = (
                 label="Back to Current Report"
                 color={ButtonColor.Secondary}
                 size={ButtonSize.M}
+                icon="xp-arrow-left"
                 onClick={() => setShowHistory(false)}
               />
             ) : (

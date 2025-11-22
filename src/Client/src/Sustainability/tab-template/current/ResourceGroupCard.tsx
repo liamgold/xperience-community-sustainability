@@ -190,6 +190,7 @@ export const ResourceGroupCard = ({ group, totalPageSize }: ResourceGroupCardPro
             <div style={resourceGroupCardStyles.expandButtonContainer}>
               <Button
                 label={expanded ? "Show less" : `Show ${group.resources.length - 3} more`}
+                icon={expanded ? "xp-chevron-up" : "xp-chevron-down"}
                 onClick={() => setExpanded(!expanded)}
                 color={ButtonColor.Secondary}
                 size={ButtonSize.S}
