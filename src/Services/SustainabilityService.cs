@@ -13,6 +13,8 @@ public interface ISustainabilityService
 {
     Task<SustainabilityResponse?> GetLastReport(int webPageItemID, string languageName);
 
+    Task<(IEnumerable<SustainabilityResponse> reports, bool hasMore)> GetReportHistory(int webPageItemID, string languageName, int? excludeReportId = null, int limit = 10, int pageIndex = 0);
+
     Task<SustainabilityResponse?> RunNewReport(string url, int webPageItemID, string languageName);
 }
 
@@ -121,7 +123,9 @@ public class SustainabilityService : ISustainabilityService
                 ResourceGroups = resourceGroups,
             };
 
-            await LogSustainabilityResponse(sustainabilityResponse, webPageItemID, languageName);
+            // Save to database and capture the newly created ID
+            var newReportId = await LogSustainabilityResponse(sustainabilityResponse, webPageItemID, languageName);
+            sustainabilityResponse.SustainabilityPageDataID = newReportId;
 
             return sustainabilityResponse;
         }
@@ -179,6 +183,7 @@ public class SustainabilityService : ISustainabilityService
 
         return new SustainabilityResponse(sustainabilityPageDataInfo.DateCreated)
         {
+            SustainabilityPageDataID = sustainabilityPageDataInfo.SustainabilityPageDataID,
             TotalSize = sustainabilityPageDataInfo.TotalSize,
             TotalEmissions = sustainabilityPageDataInfo.TotalEmissions,
             CarbonRating = sustainabilityPageDataInfo.CarbonRating,
@@ -187,7 +192,75 @@ public class SustainabilityService : ISustainabilityService
         };
     }
 
-    private async Task LogSustainabilityResponse(SustainabilityResponse sustainabilityResponse, int webPageItemID, string languageName)
+    public async Task<(IEnumerable<SustainabilityResponse> reports, bool hasMore)> GetReportHistory(int webPageItemID, string languageName, int? excludeReportId = null, int limit = 10, int pageIndex = 0)
+    {
+        // Build query with optional filter to exclude a specific report (e.g., the current one)
+        var query = _sustainabilityPageDataInfoProvider.Get()
+            .WhereEquals(nameof(SustainabilityPageDataInfo.WebPageItemID), webPageItemID)
+            .WhereEquals(nameof(SustainabilityPageDataInfo.LanguageName), languageName);
+
+        // Exclude a specific report if specified (e.g., exclude current report from history)
+        if (excludeReportId.HasValue)
+        {
+            query = query.WhereNotEquals(nameof(SustainabilityPageDataInfo.SustainabilityPageDataID), excludeReportId.Value);
+        }
+
+        // Get total count for hasMore calculation
+        var totalCount = query.Count;
+
+        var sustainabilityPageDataInfos = await query
+            .OrderByDescending(nameof(SustainabilityPageDataInfo.DateCreated))
+            .Page(pageIndex, limit)
+            .GetEnumerableTypedResultAsync();
+
+        var responses = new List<SustainabilityResponse>();
+
+        foreach (var sustainabilityPageDataInfo in sustainabilityPageDataInfos)
+        {
+            var resourceGroups = JsonSerializer.Deserialize<List<ExternalResourceGroup>>(sustainabilityPageDataInfo.ResourceGroups);
+
+            // Regenerate Content Hub URLs from stored GUIDs (ensures URLs are current)
+            if (resourceGroups != null)
+            {
+                foreach (var group in resourceGroups)
+                {
+                    if (group.Resources == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var resource in group.Resources)
+                    {
+                        if (resource.ContentItemGuid.HasValue)
+                        {
+                            resource.ContentHubUrl = await _contentHubLinkService.GenerateContentHubUrl(
+                                resource.ContentItemGuid.Value,
+                                languageName);
+                        }
+                    }
+                }
+            }
+
+            responses.Add(new SustainabilityResponse(sustainabilityPageDataInfo.DateCreated)
+            {
+                SustainabilityPageDataID = sustainabilityPageDataInfo.SustainabilityPageDataID,
+                TotalSize = sustainabilityPageDataInfo.TotalSize,
+                TotalEmissions = sustainabilityPageDataInfo.TotalEmissions,
+                CarbonRating = sustainabilityPageDataInfo.CarbonRating,
+                GreenHostingStatus = sustainabilityPageDataInfo.GreenHostingStatus,
+                ResourceGroups = resourceGroups ?? [],
+            });
+        }
+
+        // Calculate if there are more items beyond current page
+        var itemsReturned = responses.Count;
+        var itemsSoFar = (pageIndex * limit) + itemsReturned;
+        var hasMore = itemsSoFar < totalCount;
+
+        return (responses, hasMore);
+    }
+
+    private async Task<int> LogSustainabilityResponse(SustainabilityResponse sustainabilityResponse, int webPageItemID, string languageName)
     {
         var infoObject = new SustainabilityPageDataInfo()
         {
@@ -202,6 +275,9 @@ public class SustainabilityService : ISustainabilityService
         };
 
         await _sustainabilityPageDataInfoProvider.SetAsync(infoObject);
+
+        // Return the newly created ID
+        return infoObject.SustainabilityPageDataID;
     }
 
     private static bool IsImageFile(string? url)

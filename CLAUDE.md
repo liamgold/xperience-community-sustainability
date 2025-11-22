@@ -35,7 +35,20 @@ C:\Projects\xperience-community-sustainability\
 │   ├── Client/                             # React/TypeScript frontend
 │   │   └── src/
 │   │       ├── Sustainability/
-│   │       │   └── SustainabilityTabTemplate.tsx  # Main React UI component
+│   │       │   ├── utils.ts                 # Shared utilities (rating colors, resource icons, hosting status)
+│   │       │   ├── tab-template/            # Sustainability Tab (page-level) components
+│   │       │   │   ├── types.ts             # Tab-specific types and commands
+│   │       │   │   ├── SustainabilityTabTemplate.tsx  # Main orchestrator component
+│   │       │   │   ├── current/             # Current report view
+│   │       │   │   │   ├── CurrentReportView.tsx  # Current report display
+│   │       │   │   │   ├── StatCard.tsx     # Metric display card
+│   │       │   │   │   └── ResourceGroupCard.tsx  # Resource list with expand/collapse
+│   │       │   │   └── history/             # Historical reports view
+│   │       │   │       ├── HistoryView.tsx  # History view display
+│   │       │   │       ├── TrendChart.tsx   # Two side-by-side SVG charts for emissions and page weight
+│   │       │   │       └── HistoricalReportCard.tsx  # Collapsible historical report card
+│   │       │   └── dashboard-template/      # Dashboard (planned feature)
+│   │       │       └── SustainabilityDashboardTemplate.tsx
 │   │       └── entry.tsx                   # Module exports
 │   ├── Models/                             # Data structures
 │   │   ├── SustainabilityResponse.cs       # API response model
@@ -73,9 +86,18 @@ C:\Projects\xperience-community-sustainability\
   - Injects `resource-checker.js` script
   - Waits for results (60s timeout - line 60)
   - Saves report to database
+  - Generates Content Hub URLs for image resources
 
 - `GetLastReport(int webPageItemID, string languageName)` - Line 103
   - Retrieves most recent sustainability report from database
+
+- `GetReportHistory(int webPageItemID, string languageName, int? excludeReportId = null, int limit = 10, int pageIndex = 0)` - Line 195
+  - Retrieves paginated historical reports for a page (excluding a specific report if provided)
+  - Uses `.WhereNotEquals()` to filter out current report from history view
+  - Executes COUNT query to determine if more pages exist (`hasMore` flag)
+  - Returns tuple: `(IEnumerable<SustainabilityResponse> reports, bool hasMore)`
+  - Uses page-based pagination via `.Page(pageIndex, limit)` - NOT offset-based
+  - Regenerates Content Hub URLs for each historical report
 
 **Important Details**:
 - Registered as **Singleton** (line 20 in SustainabilityServiceCollectionExtensions.cs)
@@ -92,32 +114,81 @@ C:\Projects\xperience-community-sustainability\
 - Template: `@sustainability/web-admin/SustainabilityTab`
 - Order: 20000 (appears near end of tabs)
 
-**Key Method**:
-- `RunReport()` - Line 67: PageCommand that triggers new sustainability analysis
+**Key Methods**:
+- `RunReport()` - Line 78: PageCommand that triggers new sustainability analysis
+  - Returns `SustainabilityResponseResult` with current report, historical reports (excluding current), and `hasMoreHistory` flag
+  - Captures newly created report ID after database save to enable proper exclusion from history
+  - Resets historical reports list and pagination state
+- `LoadMoreHistory(LoadMoreHistoryCommandData commandData)` - Line 108: PageCommand that loads additional historical reports with pagination
+  - Accepts `pageIndex` parameter (0-based page index, NOT offset)
+  - Returns `HistoricalReportsResult` with paginated reports and `hasMoreHistory` flag
+  - Uses COUNT-based pagination detection from service layer
 
-### 3. React Frontend (src/Client/src/Sustainability/SustainabilityTabTemplate.tsx)
+### 3. React Frontend (src/Client/src/Sustainability/tab-template/)
 
-**UI Design**: Modern dashboard-style layout using native XbyK components and custom styled components.
+**Architecture**: Component-based architecture with toggle view pattern, organized by current/history views.
+
+**Main Orchestrator** (`SustainabilityTabTemplate.tsx`):
+- Manages state for current report, historical reports, and view toggling
+- Handles PageCommands: `RunReport`, `LoadMoreHistory`
+- Renders either `CurrentReportView` or `HistoryView` based on `showHistory` state
+- Header adapts: "Sustainability Report" vs "Report History" with corresponding buttons
 
 **UI States**:
 1. **No data + Available**: Shows "Run Analysis" button in centered card
 2. **No data + Not Available**: Shows unavailable message (root pages/folders)
-3. **Data loaded**: Displays comprehensive dashboard with hero carbon rating
+3. **Data loaded - Current View**: Displays comprehensive dashboard with hero carbon rating
+4. **Data loaded - History View**: Shows two separate trend charts and historical report list with pagination
 
-**Key Features**:
+**Current Report View** (`current/CurrentReportView.tsx`):
 - **Hero Carbon Rating Section** - Large 120px rating letter with gradient background themed by rating color, includes link to SWDM v4 methodology
 - **Stat Cards Grid** - 2x2 grid showing CO₂ Emissions, Page Weight, Resources count, and Efficiency rating
-- **Green Hosting Info Banner** - Displays hosting status (Green/Standard/Unknown) with color-coded badge between hero and resources
-- **Collapsible Resource Lists** - Shows 3 resources by default with "Show X more" button
-- **Resource Breakdown** - Sorted by size (largest first) with filename/path separation
-- **Percentage Badges** - Shows what % of total page weight each resource group represents
+- **Green Hosting Info Banner** - Displays hosting status (Green/Standard/Unknown) with color-coded badge
+- **Resource Breakdown** - Groups resources by type (Images, CSS, Scripts, Links, Other)
 - **Optimization Tips** - XbyK-specific features (Image Variants, AIRA) plus general web performance tips
-- **Loading states** - Built into XbyK Button component with `inProgress` prop
-- **Responsive layout** - Uses XbyK Row/Column with `colsLg`/`colsMd` breakpoints
 
-**Components Used**:
-- XbyK Native: `Card`, `Button`, `Stack`, `Row`, `Column`, `Headline`, `Spacing`
-- Custom: `StatCard`, `ResourceGroupCard` (with expand/collapse state)
+**History View** (`history/HistoryView.tsx`):
+- **Trend Charts** - Two separate side-by-side SVG charts: one for CO₂ emissions (red) and one for page weight (blue), each with independent Y-axis scales
+- **Historical Report Cards** - Collapsible cards showing date, rating, metrics, and top 3 resource groups when expanded
+- **Load More Pagination** - Button to load additional historical reports (10 at a time)
+  - **Pagination Pattern**: Uses page index-based pagination with COUNT-based detection
+  - Frontend tracks `nextPageIndex` state (incremented after each successful load)
+  - Backend returns explicit `hasMoreHistory` flag calculated via COUNT query
+  - Button visibility controlled by backend's `hasMoreHistory` (not client-side guessing)
+  - Initial state: `hasMoreHistory` initialized from backend props
+  - **Parameter Binding**: TypeScript uses camelCase `{ pageIndex: number }`, ASP.NET Core auto-maps to PascalCase `PageIndex` property
+  - Avoids duplicates: Current report excluded via `.WhereNotEquals()` at query level
+
+**Shared Components**:
+- **StatCard** (`current/StatCard.tsx`) - Reusable metric display card
+- **ResourceGroupCard** (`current/ResourceGroupCard.tsx`) - Resource list with expand/collapse, shows 3 resources by default with "Show X more" button, includes Content Hub deep links
+- **TrendChart** (`history/TrendChart.tsx`) - Two separate SVG line charts (550x200px each) with independent scales, rotated Y-axis labels, and explanatory text showing report count
+- **HistoricalReportCard** (`history/HistoricalReportCard.tsx`) - Collapsible card with balanced layout: date/resources on left, badge/metrics/chevron on right; neutral gray chevron icon
+
+**XbyK Components Used**:
+- Native: `Card`, `Button`, `Stack`, `Row`, `Column`, `Headline`, `Spacing`, `Icon`
+- Patterns: `usePageCommand` hook for backend commands, `inProgress` prop for loading states
+- Responsive: `colsLg`/`colsMd` breakpoints for grid layout
+
+**File Organization**:
+- `tab-template/types.ts` - All tab-specific types (SustainabilityData, PageAvailabilityStatus, Commands)
+- `utils.ts` (shared) - Rating colors/descriptions, resource type icons/colors, hosting status display helper
+
+**Kentico PageCommand Parameter Binding**:
+- **JSON Serialization Convention**: ASP.NET Core uses camelCase for JSON by default
+- **TypeScript → C# Mapping**: TypeScript sends `{ pageIndex: 1 }` (camelCase) → C# receives as `PageIndex` property (PascalCase)
+- **Automatic Mapping**: ASP.NET Core's JSON deserializer automatically maps camelCase JSON keys to PascalCase properties
+- **Important**: Always use camelCase in TypeScript `usePageCommand` data, even though C# properties are PascalCase
+- **Example**:
+  ```typescript
+  // TypeScript (correct - camelCase)
+  loadMoreHistory({ pageIndex: nextPageIndex })
+
+  // C# (PascalCase property)
+  public class LoadMoreHistoryCommandData {
+    public int PageIndex { get; set; }
+  }
+  ```
 
 ### 4. JavaScript Analysis (src/wwwroot/scripts/resource-checker.js)
 
@@ -228,6 +299,16 @@ The JavaScript returns data with a nested `Co2Result` structure:
 
 **Important**: The backend reads `sustainabilityData.Emissions?.Co2?.Total` (nested) to get the emission value, not a flat `Co2` property.
 
+**SustainabilityResponse.cs** (API Response Model):
+- `SustainabilityPageDataID` (int, JsonIgnore) - Database primary key, used for excluding current report from history
+- `LastRunDate` (string) - Formatted date: "MMMM dd, yyyy h:mm tt"
+- `TotalSize` (decimal) - Total page size in KB
+- `TotalEmissions` (double) - Total CO₂ emissions in grams
+- `CarbonRating` (string) - Letter grade (A+ through F)
+- `GreenHostingStatus` (string) - Green, NotGreen, or Unknown
+- `ResourceGroups` (List<ExternalResourceGroup>) - Grouped resources by type
+- `DateCreated` (DateTime, JsonIgnore) - Internal timestamp for database operations
+
 ## Data Flow
 
 ### Running a New Report
@@ -256,10 +337,41 @@ The JavaScript returns data with a nested `Co2Result` structure:
 1. User opens page with existing report
 2. `SustainabilityTab.ConfigureTemplateProperties()` called (SustainabilityTab.cs:41)
 3. Checks if page is available (has `IWebPageFieldsSource`)
-4. Calls `SustainabilityService.GetLastReport()` (SustainabilityService.cs:103)
+4. Calls `SustainabilityService.GetLastReport()` (SustainabilityService.cs:146)
 5. Query retrieves most recent report from database (TopN(1), OrderByDescending)
 6. Deserializes `ResourceGroups` JSON
-7. Returns data to React UI
+7. Loads initial historical reports (page 0, limit 10, excluding current report)
+8. Calculates `hasMoreHistory` flag via COUNT query
+9. Returns data to React UI with `hasMoreHistory` prop
+
+### Loading Historical Reports (Pagination)
+
+1. **Initial Load**:
+   - `ConfigureTemplateProperties()` calls `GetReportHistory(pageIndex: 0, limit: 10)`
+   - Service queries database excluding current report ID via `.WhereNotEquals()`
+   - Executes `query.Count` to get total available historical reports
+   - Returns first 10 reports + `hasMore` flag: `(pageIndex × limit + itemsReturned) < totalCount`
+   - Frontend initializes `hasMoreHistory` state from backend prop
+
+2. **Load More (Pagination)**:
+   - User clicks "Load More History" button
+   - React calls `loadMoreHistory({ pageIndex: nextPageIndex })` with camelCase parameter
+   - Backend `LoadMoreHistory` PageCommand receives `PageIndex` (PascalCase property)
+   - Service queries next page: `.Page(pageIndex, 10)`
+   - Returns additional 10 reports + updated `hasMore` flag
+   - Frontend appends new reports to existing list, increments `nextPageIndex`, updates `hasMoreHistory`
+
+3. **After Running New Report**:
+   - New report saved to database, ID captured
+   - Service reloads history excluding new report ID
+   - Frontend resets pagination: `nextPageIndex = 1`, replaces historical reports list
+   - `hasMoreHistory` updated from backend response
+
+**Key Implementation Details**:
+- Backend uses `.Page(pageIndex, limit)` for page-based pagination (NOT offset-based)
+- COUNT query pattern avoids "ghost" pagination buttons (no client-side length guessing)
+- Current report always excluded from history via `.WhereNotEquals(SustainabilityPageDataID, currentReportId)`
+- TypeScript uses camelCase JSON keys, ASP.NET Core auto-maps to PascalCase properties
 
 ## Known Issues & Limitations
 
@@ -339,3 +451,8 @@ Update `ResourceGroupType` enum (ExternalResourceGroup.cs:43-55) and `GetInitiat
 5. **CSP errors**: Ensure `BypassCSP = true` is set in SustainabilityService.cs
 6. **Browser not found**: Playwright requires browser installation (`playwright install chromium`)
 7. **Hosting status Unknown**: Check Event Log with console logging enabled to see if Green Web Foundation API is accessible
+8. **Pagination issues**:
+   - If PageCommand parameters always receive default values (0, null), check JSON casing - use camelCase in TypeScript
+   - If "Load More" shows when no more data exists, verify backend returns correct `hasMoreHistory` flag from COUNT query
+   - If current report appears in history, ensure `SustainabilityPageDataID` is set after saving new reports
+   - If pagination skips items, verify using `.Page(pageIndex, limit)` not offset-based pagination
