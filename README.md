@@ -91,6 +91,15 @@ Each report includes:
 - **Resource Breakdown**: Categorized by type (Images, Scripts, CSS, etc.) with individual file sizes
 - **Optimization Tips**: Xperience-specific recommendations for reducing page weight
 
+### Historical Tracking
+
+Track sustainability improvements over time with comprehensive historical reporting:
+
+- **Trend Analysis**: Two side-by-side charts showing CO₂ emissions and page weight trends over time
+- **Report History**: View all previous sustainability reports for a page with collapsible cards showing key metrics
+- **Pagination**: Load historical reports in batches to efficiently browse through your sustainability history
+- **Before/After Comparison**: Compare current and historical reports to measure the impact of optimizations
+
 ## Configuration
 
 The package can be configured using the `Sustainability` section in your `appsettings.json` file.
