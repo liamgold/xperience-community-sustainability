@@ -49,7 +49,7 @@ export const HistoryView = ({
             label="Load More History"
             color={ButtonColor.Secondary}
             size={ButtonSize.M}
-            icon="xp-chevron-down"
+            trailingIcon="xp-chevron-down"
             disabled={isLoadingMore}
             inProgress={isLoadingMore}
             onClick={() => onLoadMore(nextPageIndex)}
