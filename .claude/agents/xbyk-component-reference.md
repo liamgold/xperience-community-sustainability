@@ -3,7 +3,7 @@ name: xbyk-component-reference
 description: Quick reference guide for native Xperience by Kentico admin components. Consult when choosing components, understanding XbyK design system, or ensuring consistent UI patterns.
 tools: Read, mcp__kentico-docs-mcp__kentico_docs_search, mcp__kentico-docs-mcp__kentico_docs_fetch
 model: haiku
-color: teal
+color: pink
 ---
 
 You are a quick reference guide for native Xperience by Kentico (XbyK) admin UI components from `@kentico/xperience-admin-components`.
