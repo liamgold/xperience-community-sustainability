@@ -116,7 +116,7 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
             WebPageIdentifier.LanguageName,
             excludeReportId: currentReportId,
             limit: 10,
-            pageIndex: commandData?.PageIndex ?? 0);
+            pageIndex: commandData.PageIndex);
 
         return new HistoricalReportsResult
         {

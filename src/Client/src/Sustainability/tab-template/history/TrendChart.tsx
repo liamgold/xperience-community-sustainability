@@ -1,6 +1,9 @@
 import React from "react";
 import { SustainabilityData } from "../types";
 
+// Maximum number of reports to display in trend charts (matches pagination limit)
+const MAX_TREND_REPORTS = 10;
+
 interface TrendChartProps {
   currentReport: SustainabilityData;
   historicalReports: SustainabilityData[];
@@ -165,11 +168,25 @@ const SingleTrendChart = ({
 };
 
 export const TrendChart = ({ currentReport, historicalReports }: TrendChartProps) => {
-  // Combine current and historical reports, limiting to last 10
-  const allReports = [currentReport, ...historicalReports].slice(0, 10).reverse();
+  // Combine current and historical reports, limiting to last MAX_TREND_REPORTS
+  const allReports = [currentReport, ...historicalReports].slice(0, MAX_TREND_REPORTS).reverse();
 
   if (allReports.length < 2) {
-    return null; // Need at least 2 data points for a trend
+    return (
+      <div
+        style={{
+          background: "white",
+          border: "1px solid #e5e7eb",
+          borderRadius: "8px",
+          padding: "24px",
+          textAlign: "center",
+          color: "#6b7280",
+          marginBottom: "20px",
+        }}
+      >
+        Trend analysis requires at least 2 data points for a trend chart.
+      </div>
+    );
   }
 
   const emissions = allReports.map((r) => r.totalEmissions);
