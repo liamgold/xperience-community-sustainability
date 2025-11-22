@@ -12,7 +12,7 @@ interface HistoryViewProps {
   isLoadingMore: boolean;
   hasMoreHistory: boolean;
   nextPageIndex: number;
-  loadMoreHistory: (data: { pageIndex: number }) => void;
+  onLoadMore: (pageIndex: number) => void;
 }
 
 export const HistoryView = ({
@@ -23,7 +23,7 @@ export const HistoryView = ({
   isLoadingMore,
   hasMoreHistory,
   nextPageIndex,
-  loadMoreHistory,
+  onLoadMore,
 }: HistoryViewProps) => (
   <>
     {/* Trend Chart */}
@@ -51,9 +51,7 @@ export const HistoryView = ({
             size={ButtonSize.M}
             disabled={isLoadingMore}
             inProgress={isLoadingMore}
-            onClick={() => {
-              loadMoreHistory({ pageIndex: nextPageIndex });
-            }}
+            onClick={() => onLoadMore(nextPageIndex)}
           />
         </div>
       )}

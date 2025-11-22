@@ -38,93 +38,95 @@ export const HistoricalReportCard = ({ report, isExpanded, onToggle }: Historica
         }}
         onClick={onToggle}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          {/* Date */}
-          <div>
+        {/* Date Info - Left */}
+        <div>
+          <div
+            style={{
+              fontSize: "13px",
+              fontWeight: 600,
+              color: "#111827",
+              marginBottom: "2px",
+            }}
+          >
+            {report.lastRunDate}
+          </div>
+          <div style={{ fontSize: "12px", color: "#9ca3af" }}>
+            {totalResources} resources • {report.totalSize.toFixed(2)} KB
+          </div>
+        </div>
+
+        {/* Metrics - Right */}
+        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+          {/* Carbon Rating Badge */}
+          <div
+            style={{
+              padding: "6px 12px",
+              background: ratingColor.bg,
+              color: ratingColor.primary,
+              fontSize: "16px",
+              fontWeight: 700,
+              borderRadius: "6px",
+              border: `1px solid ${ratingColor.border}`,
+            }}
+          >
+            {report.carbonRating}
+          </div>
+
+          {/* Emissions */}
+          <div style={{ textAlign: "center", minWidth: "60px" }}>
+            <div
+              style={{
+                fontSize: "11px",
+                color: "#6b7280",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                marginBottom: "2px",
+              }}
+            >
+              CO₂
+            </div>
             <div
               style={{
                 fontSize: "13px",
                 fontWeight: 600,
                 color: "#111827",
+              }}
+            >
+              {report.totalEmissions.toFixed(3)}g
+            </div>
+          </div>
+
+          {/* Page Weight */}
+          <div style={{ textAlign: "center", minWidth: "60px" }}>
+            <div
+              style={{
+                fontSize: "11px",
+                color: "#6b7280",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
                 marginBottom: "2px",
               }}
             >
-              {report.lastRunDate}
+              Weight
             </div>
-            <div style={{ fontSize: "12px", color: "#9ca3af" }}>
-              {totalResources} resources • {report.totalSize.toFixed(2)} KB
-            </div>
-          </div>
-
-          {/* Metrics */}
-          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-            {/* Carbon Rating Badge */}
             <div
               style={{
-                padding: "6px 12px",
-                background: ratingColor.bg,
-                color: ratingColor.primary,
-                fontSize: "16px",
-                fontWeight: 700,
-                borderRadius: "6px",
-                border: `1px solid ${ratingColor.border}`,
+                fontSize: "13px",
+                fontWeight: 600,
+                color: "#111827",
               }}
             >
-              {report.carbonRating}
-            </div>
-
-            {/* Emissions */}
-            <div style={{ textAlign: "right" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                CO₂
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#111827",
-                }}
-              >
-                {report.totalEmissions.toFixed(3)}g
-              </div>
-            </div>
-
-            {/* Page Weight */}
-            <div style={{ textAlign: "right" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Weight
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#111827",
-                }}
-              >
-                {(report.totalSize / 1024).toFixed(2)}MB
-              </div>
+              {(report.totalSize / 1024).toFixed(2)}MB
             </div>
           </div>
-        </div>
 
-        {/* Expand Icon */}
-        <Icon
-          name={isExpanded ? "xp-chevron-up" : "xp-chevron-down"}
-        />
+          {/* Expand Icon */}
+          <div style={{ color: "#6b7280", display: "flex", alignItems: "center" }}>
+            <Icon
+              name={isExpanded ? "xp-chevron-up" : "xp-chevron-down"}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Expanded Content */}

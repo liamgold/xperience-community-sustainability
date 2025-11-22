@@ -77,17 +77,16 @@ export const SustainabilityTabTemplate = (
           ...response.historicalReports,
         ]);
         setNextPageIndex((prev) => prev + 1); // Increment to next page
-        setIsLoadingMore(false);
         // Set hasMoreHistory from backend response
         setHasMoreHistory(response.hasMoreHistory ?? false);
       } else {
         setHasMoreHistory(false);
-        setIsLoadingMore(false);
       }
+      setIsLoadingMore(false);
     },
     onError: (err) => {
-      setIsLoadingMore(false);
       console.error("Load more history error:", err);
+      setIsLoadingMore(false);
     },
   });
 
@@ -258,10 +257,12 @@ export const SustainabilityTabTemplate = (
             expandedReportIndex={expandedReportIndex}
             setExpandedReportIndex={setExpandedReportIndex}
             isLoadingMore={isLoadingMore}
-            setIsLoadingMore={setIsLoadingMore}
             hasMoreHistory={hasMoreHistory}
             nextPageIndex={nextPageIndex}
-            loadMoreHistory={loadMoreHistory}
+            onLoadMore={(pageIndex) => {
+              setIsLoadingMore(true);
+              loadMoreHistory({ pageIndex });
+            }}
           />
         )}
       </Stack>
