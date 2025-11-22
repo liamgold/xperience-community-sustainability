@@ -90,6 +90,36 @@ export const SustainabilityTabTemplate = (
     },
   });
 
+  const exportPdf = usePageCommand<
+    { pdfBase64: string; fileName: string }
+  >(Commands.ExportReportAsPdf, {
+    after: (response) => {
+      if (response) {
+        // Convert base64 to blob and trigger download
+        const byteCharacters = atob(response.pdfBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = response.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    },
+    onError: (err) => {
+      console.error("PDF export error:", err);
+    },
+  });
+
   if (data === undefined || data === null) {
     return (
       <div style={{ padding: "32px", maxWidth: "1400px", margin: "0 auto" }}>
@@ -202,6 +232,13 @@ export const SustainabilityTabTemplate = (
               />
             ) : (
               <>
+                <Button
+                  label="Export as PDF"
+                  color={ButtonColor.Secondary}
+                  size={ButtonSize.M}
+                  inProgress={exportPdf.inProgress}
+                  onClick={() => exportPdf.execute()}
+                />
                 {historicalReports.length > 0 && (
                   <Button
                     label="View History"
