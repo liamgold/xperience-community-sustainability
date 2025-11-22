@@ -167,7 +167,7 @@ C:\Projects\xperience-community-sustainability\
 
 **XbyK Components Used**:
 - Native: `Card`, `Button`, `Stack`, `Row`, `Column`, `Headline`, `Spacing`, `Icon`
-- Patterns: `usePageCommand` hook for backend commands, `inProgress` prop for loading states
+- Patterns: `usePageCommand` hook for backend commands, manual `useState` for loading states, `inProgress` and `disabled` props on buttons
 - Responsive: `colsLg`/`colsMd` breakpoints for grid layout
 
 **File Organization**:
@@ -189,6 +189,46 @@ C:\Projects\xperience-community-sustainability\
     public int PageIndex { get; set; }
   }
   ```
+
+**usePageCommand Hook - Loading State Pattern**:
+- **IMPORTANT**: `usePageCommand` does NOT provide a built-in `inProgress` property
+- **Return type**: Only returns `{ execute: (data?: TCommandData) => void }`
+- **Loading states must be managed manually** using `useState`
+- **Correct pattern**:
+  ```typescript
+  // 1. Create manual state
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 2. Configure usePageCommand with after/onError callbacks
+  const { execute: myCommand } = usePageCommand<ResponseType>(
+    Commands.MyCommand,
+    {
+      after: (response) => {
+        // Process response...
+        setIsLoading(false);  // Stop loading when done
+      },
+      onError: (err) => {
+        console.error(err);
+        setIsLoading(false);  // Stop loading on error
+      },
+    }
+  );
+
+  // 3. Set loading state before executing
+  const handleClick = () => {
+    setIsLoading(true);
+    myCommand();
+  };
+
+  // 4. Use state for button props
+  <Button
+    label="Run Command"
+    onClick={handleClick}
+    disabled={isLoading}
+    inProgress={isLoading}
+  />
+  ```
+- **Examples in codebase**: See `isLoading` (line 26), `isExportingPdf` (line 27), and `isLoadingMore` (line 38) in SustainabilityTabTemplate.tsx
 
 ### 4. JavaScript Analysis (src/wwwroot/scripts/resource-checker.js)
 

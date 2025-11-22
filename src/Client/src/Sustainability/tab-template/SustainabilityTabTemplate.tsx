@@ -24,6 +24,7 @@ export const SustainabilityTabTemplate = (
   props: SustainabilityTabTemplateProps | null
 ) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<SustainabilityData | undefined | null>(
     props?.sustainabilityData
@@ -116,9 +117,11 @@ export const SustainabilityTabTemplate = (
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
         }
+        setIsExportingPdf(false);
       },
       onError: (err) => {
         console.error("PDF export error:", err);
+        setIsExportingPdf(false);
       },
     }
   );
@@ -241,8 +244,12 @@ export const SustainabilityTabTemplate = (
                   color={ButtonColor.Secondary}
                   size={ButtonSize.M}
                   icon="xp-file-pdf"
-                  inProgress={exportPdf.inProgress}
-                  onClick={() => exportPdf.execute()}
+                  disabled={isExportingPdf}
+                  inProgress={isExportingPdf}
+                  onClick={() => {
+                    setIsExportingPdf(true);
+                    exportPdf.execute();
+                  }}
                 />
                 {historicalReports.length > 0 && (
                   <Button
