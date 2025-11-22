@@ -236,6 +236,7 @@ export const SustainabilityTabTemplate = (
                   label="Export as PDF"
                   color={ButtonColor.Secondary}
                   size={ButtonSize.M}
+                  icon="xp-download"
                   inProgress={exportPdf.inProgress}
                   onClick={() => exportPdf.execute()}
                 />
@@ -244,6 +245,7 @@ export const SustainabilityTabTemplate = (
                     label="View History"
                     color={ButtonColor.Secondary}
                     size={ButtonSize.M}
+                    icon="xp-clock"
                     onClick={() => setShowHistory(true)}
                   />
                 )}
@@ -251,6 +253,7 @@ export const SustainabilityTabTemplate = (
                   label="Run New Analysis"
                   color={ButtonColor.Primary}
                   size={ButtonSize.M}
+                  icon="xp-rotate-right"
                   disabled={isLoading}
                   inProgress={isLoading}
                   onClick={() => {
