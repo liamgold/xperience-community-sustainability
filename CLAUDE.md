@@ -45,7 +45,7 @@ C:\Projects\xperience-community-sustainability\
 │   │       │   │   │   └── ResourceGroupCard.tsx  # Resource list with expand/collapse
 │   │       │   │   └── history/             # Historical reports view
 │   │       │   │       ├── HistoryView.tsx  # History view display
-│   │       │   │       ├── TrendChart.tsx   # SVG line chart for emissions/size trends
+│   │       │   │       ├── TrendChart.tsx   # Two side-by-side SVG charts for emissions and page weight
 │   │       │   │       └── HistoricalReportCard.tsx  # Collapsible historical report card
 │   │       │   └── dashboard-template/      # Dashboard (planned feature)
 │   │       │       └── SustainabilityDashboardTemplate.tsx
@@ -138,7 +138,7 @@ C:\Projects\xperience-community-sustainability\
 1. **No data + Available**: Shows "Run Analysis" button in centered card
 2. **No data + Not Available**: Shows unavailable message (root pages/folders)
 3. **Data loaded - Current View**: Displays comprehensive dashboard with hero carbon rating
-4. **Data loaded - History View**: Shows trend chart and historical report list with pagination
+4. **Data loaded - History View**: Shows two separate trend charts and historical report list with pagination
 
 **Current Report View** (`current/CurrentReportView.tsx`):
 - **Hero Carbon Rating Section** - Large 120px rating letter with gradient background themed by rating color, includes link to SWDM v4 methodology
@@ -148,7 +148,7 @@ C:\Projects\xperience-community-sustainability\
 - **Optimization Tips** - XbyK-specific features (Image Variants, AIRA) plus general web performance tips
 
 **History View** (`history/HistoryView.tsx`):
-- **Trend Chart** - Custom SVG line chart showing CO₂ emissions and page weight trends over loaded reports with dual Y-axes
+- **Trend Charts** - Two separate side-by-side SVG charts: one for CO₂ emissions (red) and one for page weight (blue), each with independent Y-axis scales
 - **Historical Report Cards** - Collapsible cards showing date, rating, metrics, and top 3 resource groups when expanded
 - **Load More Pagination** - Button to load additional historical reports (10 at a time)
   - **Pagination Pattern**: Uses page index-based pagination with COUNT-based detection
@@ -162,8 +162,8 @@ C:\Projects\xperience-community-sustainability\
 **Shared Components**:
 - **StatCard** (`current/StatCard.tsx`) - Reusable metric display card
 - **ResourceGroupCard** (`current/ResourceGroupCard.tsx`) - Resource list with expand/collapse, shows 3 resources by default with "Show X more" button, includes Content Hub deep links
-- **TrendChart** (`history/TrendChart.tsx`) - SVG-based dual-axis line chart
-- **HistoricalReportCard** (`history/HistoricalReportCard.tsx`) - Collapsible historical report with badge, metrics, and resource preview
+- **TrendChart** (`history/TrendChart.tsx`) - Two separate SVG line charts (550x200px each) with independent scales, rotated Y-axis labels, and explanatory text showing report count
+- **HistoricalReportCard** (`history/HistoricalReportCard.tsx`) - Collapsible card with balanced layout: date/resources on left, badge/metrics/chevron on right; neutral gray chevron icon
 
 **XbyK Components Used**:
 - Native: `Card`, `Button`, `Stack`, `Row`, `Column`, `Headline`, `Spacing`, `Icon`
