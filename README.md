@@ -88,6 +88,7 @@ Each report includes:
 - **Page Weight**: Total size of all resources loaded
 - **Resource Breakdown**: Categorized by type (Images, Scripts, CSS, etc.) with individual file sizes
 - **Optimization Tips**: Xperience-specific recommendations for reducing page weight
+- **PDF Export**: Download complete sustainability reports as PDF for sharing and documentation
 
 ### Historical Tracking
 
