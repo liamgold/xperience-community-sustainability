@@ -94,7 +94,7 @@ public class SustainabilityPdfService : ISustainabilityPdfService
         var resourceBreakdown = new System.Text.StringBuilder();
         if (report.ResourceGroups != null && report.ResourceGroups.Count > 0)
         {
-            resourceBreakdown.Append("<div style=\"margin-top: 30px;\">");
+            resourceBreakdown.Append("<div class=\"resource-breakdown\">");
             resourceBreakdown.Append("<h2 style=\"font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 16px;\">Resource Breakdown</h2>");
 
             foreach (var group in report.ResourceGroups.OrderByDescending(g => g.TotalSize))
@@ -140,6 +140,9 @@ public class SustainabilityPdfService : ISustainabilityPdfService
             line-height: 1.6;
             color: #111827;
             padding: 20px;
+        }}
+        .resource-breakdown {{
+            page-break-before: always;
         }}
         .resource-group {{
             page-break-inside: avoid;
