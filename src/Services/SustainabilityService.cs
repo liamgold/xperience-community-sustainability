@@ -453,14 +453,22 @@ public class SustainabilityService : ISustainabilityService
 
         var ratingDescription = report.CarbonRating switch
         {
-            "A+" => "Exceptional - Industry Leading",
-            "A" => "Excellent - Top 5%",
-            "B" => "Good - Above Average",
-            "C" => "Average - Room for Improvement",
-            "D" => "Below Average - Needs Attention",
-            "E" => "Poor - Significant Work Needed",
-            "F" => "Very Poor - Urgent Action Required",
+            "A+" => "Extremely efficient",
+            "A" => "Very efficient",
+            "B" => "Efficient",
+            "C" => "Moderate efficiency",
+            "D" => "Low efficiency",
+            "E" => "Poor efficiency",
+            "F" => "Very poor efficiency",
             _ => "Not Rated"
+        };
+
+        var ratingSecondaryText = report.CarbonRating switch
+        {
+            "A+" or "A" => "This page has excellent carbon efficiency.",
+            "B" or "C" => "This page has room for improvement.",
+            "D" or "E" or "F" => "This page needs significant optimization.",
+            _ => ""
         };
 
         var hostingBadge = report.GreenHostingStatus == "Green"
@@ -483,7 +491,7 @@ public class SustainabilityService : ISustainabilityService
                 if (topResources == null || topResources.Count == 0) continue;
 
                 resourceBreakdown.Append($@"
-                <div style=""margin-bottom: 20px; padding: 16px; background: #f9fafb; border-radius: 8px;"">
+                <div class=""resource-group"" style=""margin-bottom: 20px; padding: 16px; background: #f9fafb; border-radius: 8px;"">
                     <div style=""font-weight: 600; color: #111827; margin-bottom: 8px;"">{group.Name}</div>
                     <div style=""font-size: 12px; color: #6b7280; margin-bottom: 12px;"">{group.Resources?.Count ?? 0} resources • {group.TotalSize:F2} KB total</div>
                     <table style=""width: 100%; border-collapse: collapse;"">
@@ -521,6 +529,18 @@ public class SustainabilityService : ISustainabilityService
             color: #111827;
             padding: 20px;
         }}
+        .resource-group {{
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }}
+        .carbon-rating-hero {{
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }}
+        .metrics-grid {{
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }}
     </style>
 </head>
 <body>
@@ -534,14 +554,16 @@ public class SustainabilityService : ISustainabilityService
         </div>
 
         <!-- Carbon Rating Hero -->
-        <div style=""background: linear-gradient(135deg, {ratingColor}15 0%, white 100%); border: 2px solid {ratingColor}; border-radius: 12px; padding: 30px; margin-bottom: 30px; text-align: center;"">
-            <div style=""font-size: 72px; font-weight: 900; color: {ratingColor}; margin-bottom: 12px;"">{report.CarbonRating}</div>
+        <div class=""carbon-rating-hero"" style=""background: linear-gradient(135deg, {ratingColor}15 0%, white 100%); border: 2px solid {ratingColor}; border-radius: 12px; padding: 30px; margin-bottom: 30px; text-align: center;"">
+            <div style=""font-size: 14px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;"">Carbon Rating</div>
+            <div style=""font-size: 72px; font-weight: 900; color: {ratingColor}; margin-bottom: 12px; line-height: 1;"">{report.CarbonRating}</div>
             <div style=""font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 8px;"">{ratingDescription}</div>
+            <div style=""font-size: 14px; color: #6b7280; margin-bottom: 16px;"">{ratingSecondaryText}</div>
             {hostingBadge}
         </div>
 
         <!-- Metrics Grid -->
-        <div style=""display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px;"">
+        <div class=""metrics-grid"" style=""display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px;"">
             <div style=""background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;"">
                 <div style=""font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-bottom: 8px;"">CO₂ Emissions</div>
                 <div style=""font-size: 28px; font-weight: 700; color: #111827; margin-bottom: 4px;"">{report.TotalEmissions:F3}g</div>
@@ -568,7 +590,7 @@ public class SustainabilityService : ISustainabilityService
 
         <!-- Footer -->
         <div style=""margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 11px; color: #9ca3af;"">
-            <div>Powered by <strong>Xperience Community: Sustainability</strong></div>
+            <div>Powered by <strong><a href=""https://github.com/liamgold/xperience-community-sustainability"" style=""color: #111827; text-decoration: none;"">Xperience Community: Sustainability</a></strong></div>
             <div style=""margin-top: 4px;"">Carbon ratings based on Sustainable Web Design Model v4</div>
             <div style=""margin-top: 4px;"">https://sustainablewebdesign.org/digital-carbon-ratings/</div>
         </div>

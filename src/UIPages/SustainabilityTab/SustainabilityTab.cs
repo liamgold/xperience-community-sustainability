@@ -144,12 +144,19 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
             .InLanguage(WebPageIdentifier.LanguageName);
 
         var currentPage = (await _contentQueryExecutor.GetMappedWebPageResult<IWebPageFieldsSource>(builder)).FirstOrDefault();
-        var pageTitle = currentPage?.SystemFields.ContentItemName ?? "Page";
+        // Use the page's display name (WebPageItemName) instead of ContentItemName (codename)
+        var pageTitle = currentPage?.SystemFields.WebPageItemName ?? "Page";
 
         var webPageUrl = await _webPageUrlRetriever.Retrieve(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
         var pdfBytes = await _sustainabilityService.GeneratePdfReport(report, pageTitle, webPageUrl.AbsoluteUrl);
 
-        var fileName = $"sustainability-report-{DateTime.Now:yyyy-MM-dd-HHmmss}.pdf";
+        // Sanitize page title for filename and limit length
+        var sanitizedTitle = string.Join("-", pageTitle.Split(System.IO.Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+        if (sanitizedTitle.Length > 50)
+        {
+            sanitizedTitle = sanitizedTitle.Substring(0, 50);
+        }
+        var fileName = $"sustainability-report-{sanitizedTitle}-{DateTime.Now:yyyy-MM-dd-HHmmss}.pdf";
 
         return new PdfExportResult
         {
