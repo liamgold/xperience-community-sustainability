@@ -156,7 +156,7 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
         {
             sanitizedTitle = sanitizedTitle.Substring(0, 50);
         }
-        var fileName = $"sustainability-report-{sanitizedTitle}-{DateTime.Now:yyyy-MM-dd-HHmmss}.pdf";
+        var fileName = $"{sanitizedTitle}-{DateTime.Now:yyyy-MM-dd-HHmmss}.pdf";
 
         return new PdfExportResult
         {
