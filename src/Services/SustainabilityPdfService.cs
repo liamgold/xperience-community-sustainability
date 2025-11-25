@@ -112,7 +112,7 @@ public class SustainabilityPdfService : ISustainabilityPdfService
                 foreach (var resource in topResources)
                 {
                     var fileName = System.IO.Path.GetFileName(resource.Url) ?? resource.Url ?? "Unknown";
-                    if (fileName.Length > 60) fileName = fileName.Substring(0, 57) + "...";
+                    if (fileName.Length > 60) fileName = fileName[..57] + "...";
 
                     resourceBreakdown.Append($@"
                         <tr style=""border-bottom: 1px solid #e5e7eb;"">

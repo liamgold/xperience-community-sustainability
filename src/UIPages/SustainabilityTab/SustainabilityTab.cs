@@ -157,7 +157,7 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
         var sanitizedTitle = string.Join("-", pageTitle.Split(System.IO.Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
         if (sanitizedTitle.Length > 50)
         {
-            sanitizedTitle = sanitizedTitle.Substring(0, 50);
+            sanitizedTitle = sanitizedTitle[..50];
         }
         var fileName = $"{sanitizedTitle}-{DateTime.Now:yyyy-MM-dd-HHmmss}.pdf";
 
