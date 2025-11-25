@@ -12,14 +12,6 @@ A community-driven open-source package that brings sustainability insights and a
 
 > For more details about this package, check out [Bringing Sustainability Insights to Xperience by Kentico](https://www.goldfinch.me/blog/bringing-sustainability-insights-to-xperience-by-kentico) which provides more background information around the package and its origin.
 
-## Screenshots
-
-Once installed, a new tab appears for each page in your web channels. The Sustainability tab allows content editors and marketers to see and benchmark page weight and carbon emissions, which is then converted to a carbon rating for individual pages.
-
-<a href="/src/images/SustainabilityReport-PageTab.jpeg">
-  <img src="/src/images/SustainabilityReport-PageTab.jpeg" width="800" alt="Sustainability Tab for pages in Xperience by Kentico">
-</a>
-
 ## Library Version Matrix
 
 | Xperience Version | Library Version |
@@ -83,6 +75,12 @@ The hosting status is displayed in the Sustainability report with three possible
 
 ### Sustainability Report
 
+Once installed, a new tab appears for each page in your web channels. The Sustainability tab allows content editors and marketers to see and benchmark page weight and carbon emissions, which is then converted to a carbon rating for individual pages.
+
+<a href="/src/images/SustainabilityReport-PageTab.jpeg">
+  <img src="/src/images/SustainabilityReport-PageTab.jpeg" width="800" alt="Sustainability Tab for pages in Xperience by Kentico">
+</a>
+
 Each report includes:
 
 - **Carbon Rating**: Letter grade (A+ through F) based on grams CO₂ per page view
@@ -90,10 +88,15 @@ Each report includes:
 - **Page Weight**: Total size of all resources loaded
 - **Resource Breakdown**: Categorized by type (Images, Scripts, CSS, etc.) with individual file sizes
 - **Optimization Tips**: Xperience-specific recommendations for reducing page weight
+- **PDF Export**: Download complete sustainability reports as PDF for sharing and documentation
 
 ### Historical Tracking
 
 Track sustainability improvements over time with comprehensive historical reporting:
+
+<a href="/src/images/SustainabilityReport-ReportHistory.jpeg">
+  <img src="/src/images/SustainabilityReport-ReportHistory.jpeg" width="800" alt="Historical tracking with trend charts and report history">
+</a>
 
 - **Trend Analysis**: Two side-by-side charts showing CO₂ emissions and page weight trends over time
 - **Report History**: View all previous sustainability reports for a page with collapsible cards showing key metrics

@@ -35,4 +35,5 @@ export interface SustainabilityTabTemplateProps {
 export const Commands = {
   RunReport: "RunReport",
   LoadMoreHistory: "LoadMoreHistory",
+  ExportReportAsPdf: "ExportReportAsPdf",
 };

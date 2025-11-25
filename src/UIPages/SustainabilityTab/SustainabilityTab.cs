@@ -22,6 +22,7 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
 {
     private readonly IWebPageUrlRetriever _webPageUrlRetriever;
     private readonly ISustainabilityService _sustainabilityService;
+    private readonly ISustainabilityPdfService _sustainabilityPdfService;
     private readonly IContentQueryExecutor _contentQueryExecutor;
 
     public SustainabilityTab(
@@ -29,11 +30,13 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
         IAuthenticatedUserAccessor authenticatedUserAccessor,
         IPageLinkGenerator pageLinkGenerator,
         ISustainabilityService sustainabilityService,
+        ISustainabilityPdfService sustainabilityPdfService,
         IWebPageUrlRetriever webPageUrlRetriever,
         IContentQueryExecutor contentQueryExecutor)
         : base(authenticatedUserAccessor, webPageManagerFactory, pageLinkGenerator)
     {
         _sustainabilityService = sustainabilityService;
+        _sustainabilityPdfService = sustainabilityPdfService;
         _webPageUrlRetriever = webPageUrlRetriever;
         _contentQueryExecutor = contentQueryExecutor;
     }
@@ -124,11 +127,57 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
             HasMoreHistory = hasMore,
         };
     }
+
+    [PageCommand]
+    public async Task<PdfExportResult> ExportReportAsPdf()
+    {
+        var report = await _sustainabilityService.GetLastReport(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
+
+        if (report == null)
+        {
+            throw new InvalidOperationException("No sustainability report available to export.");
+        }
+
+        // Get the page name for the PDF
+        var builder = new ContentItemQueryBuilder()
+            .ForContentTypes(query =>
+            {
+                query.ForWebsite([WebPageIdentifier.WebPageItemID]);
+            })
+            .InLanguage(WebPageIdentifier.LanguageName);
+
+        var currentPage = (await _contentQueryExecutor.GetMappedWebPageResult<IWebPageFieldsSource>(builder)).FirstOrDefault();
+        // Use the page's display name (WebPageItemName) instead of ContentItemName (codename)
+        var pageTitle = currentPage?.SystemFields.WebPageItemName ?? "Page";
+
+        var webPageUrl = await _webPageUrlRetriever.Retrieve(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
+        var pdfBytes = await _sustainabilityPdfService.GeneratePdfReport(report, pageTitle, webPageUrl.AbsoluteUrl);
+
+        // Sanitize page title for filename and limit length
+        var sanitizedTitle = string.Join("-", pageTitle.Split(System.IO.Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+        if (sanitizedTitle.Length > 50)
+        {
+            sanitizedTitle = sanitizedTitle[..50];
+        }
+        var fileName = $"{sanitizedTitle}-{DateTime.Now:yyyy-MM-dd-HHmmss}.pdf";
+
+        return new PdfExportResult
+        {
+            PdfBase64 = Convert.ToBase64String(pdfBytes),
+            FileName = fileName
+        };
+    }
 }
 
 public readonly record struct SustainabilityResponseResult(SustainabilityResponse? SustainabilityData, List<SustainabilityResponse> HistoricalReports, bool HasMoreHistory);
 
 public readonly record struct HistoricalReportsResult(List<SustainabilityResponse> HistoricalReports, bool HasMoreHistory);
+
+public readonly record struct PdfExportResult
+{
+    public string PdfBase64 { get; init; }
+    public string FileName { get; init; }
+}
 
 public class LoadMoreHistoryCommandData
 {

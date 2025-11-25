@@ -24,6 +24,7 @@ export const SustainabilityTabTemplate = (
   props: SustainabilityTabTemplateProps | null
 ) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<SustainabilityData | undefined | null>(
     props?.sustainabilityData
@@ -36,7 +37,9 @@ export const SustainabilityTabTemplate = (
   );
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   // Initialize hasMoreHistory from backend
-  const [hasMoreHistory, setHasMoreHistory] = useState(props?.hasMoreHistory ?? false);
+  const [hasMoreHistory, setHasMoreHistory] = useState(
+    props?.hasMoreHistory ?? false
+  );
   const [showHistory, setShowHistory] = useState(false);
   const [nextPageIndex, setNextPageIndex] = useState(1); // Initial load got page 0, next is page 1
 
@@ -89,6 +92,38 @@ export const SustainabilityTabTemplate = (
       setIsLoadingMore(false);
     },
   });
+
+  const exportPdf = usePageCommand<{ pdfBase64: string; fileName: string }>(
+    Commands.ExportReportAsPdf,
+    {
+      after: (response) => {
+        if (response) {
+          // Convert base64 to blob and trigger download
+          const byteCharacters = atob(response.pdfBase64);
+          const byteArray = new Uint8Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteArray[i] = byteCharacters.charCodeAt(i);
+          }
+          const blob = new Blob([byteArray], { type: "application/pdf" });
+
+          // Create download link
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = response.fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }
+        setIsExportingPdf(false);
+      },
+      onError: (err) => {
+        console.error("PDF export error:", err);
+        setIsExportingPdf(false);
+      },
+    }
+  );
 
   if (data === undefined || data === null) {
     return (
@@ -198,15 +233,29 @@ export const SustainabilityTabTemplate = (
                 label="Back to Current Report"
                 color={ButtonColor.Secondary}
                 size={ButtonSize.M}
+                icon="xp-arrow-left"
                 onClick={() => setShowHistory(false)}
               />
             ) : (
               <>
+                <Button
+                  label="Export as PDF"
+                  color={ButtonColor.Secondary}
+                  size={ButtonSize.M}
+                  icon="xp-file-pdf"
+                  disabled={isExportingPdf}
+                  inProgress={isExportingPdf}
+                  onClick={() => {
+                    setIsExportingPdf(true);
+                    exportPdf.execute();
+                  }}
+                />
                 {historicalReports.length > 0 && (
                   <Button
                     label="View History"
                     color={ButtonColor.Secondary}
                     size={ButtonSize.M}
+                    icon="xp-clock"
                     onClick={() => setShowHistory(true)}
                   />
                 )}
@@ -214,6 +263,7 @@ export const SustainabilityTabTemplate = (
                   label="Run New Analysis"
                   color={ButtonColor.Primary}
                   size={ButtonSize.M}
+                  icon="xp-rotate-right"
                   disabled={isLoading}
                   inProgress={isLoading}
                   onClick={() => {
