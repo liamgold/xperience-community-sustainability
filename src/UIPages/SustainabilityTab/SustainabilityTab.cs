@@ -22,6 +22,7 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
 {
     private readonly IWebPageUrlRetriever _webPageUrlRetriever;
     private readonly ISustainabilityService _sustainabilityService;
+    private readonly ISustainabilityPdfService _sustainabilityPdfService;
     private readonly IContentQueryExecutor _contentQueryExecutor;
 
     public SustainabilityTab(
@@ -29,11 +30,13 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
         IAuthenticatedUserAccessor authenticatedUserAccessor,
         IPageLinkGenerator pageLinkGenerator,
         ISustainabilityService sustainabilityService,
+        ISustainabilityPdfService sustainabilityPdfService,
         IWebPageUrlRetriever webPageUrlRetriever,
         IContentQueryExecutor contentQueryExecutor)
         : base(authenticatedUserAccessor, webPageManagerFactory, pageLinkGenerator)
     {
         _sustainabilityService = sustainabilityService;
+        _sustainabilityPdfService = sustainabilityPdfService;
         _webPageUrlRetriever = webPageUrlRetriever;
         _contentQueryExecutor = contentQueryExecutor;
     }
@@ -148,7 +151,7 @@ public sealed class SustainabilityTab : WebPageBase<SustainabilityTabProperties>
         var pageTitle = currentPage?.SystemFields.WebPageItemName ?? "Page";
 
         var webPageUrl = await _webPageUrlRetriever.Retrieve(WebPageIdentifier.WebPageItemID, WebPageIdentifier.LanguageName);
-        var pdfBytes = await _sustainabilityService.GeneratePdfReport(report, pageTitle, webPageUrl.AbsoluteUrl);
+        var pdfBytes = await _sustainabilityPdfService.GeneratePdfReport(report, pageTitle, webPageUrl.AbsoluteUrl);
 
         // Sanitize page title for filename and limit length
         var sanitizedTitle = string.Join("-", pageTitle.Split(System.IO.Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));

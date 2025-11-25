@@ -18,6 +18,7 @@ public static class SustainabilityServiceCollectionExtensions
         services.Configure<SustainabilityOptions>(configuration.GetSection("Sustainability"));
 
         services.AddScoped<ISustainabilityService, SustainabilityService>();
+        services.AddScoped<ISustainabilityPdfService, SustainabilityPdfService>();
         services.AddScoped<IContentHubLinkService, ContentHubLinkService>();
         services.AddSingleton<ISustainabilityModuleInstaller, SustainabilityModuleInstaller>();
 
