@@ -1,28 +1,40 @@
-﻿using CMS.Base;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 using DancingGoat;
+using DancingGoat.EmailComponents;
 using DancingGoat.Helpers.Generators;
 using DancingGoat.Models;
+
+using CMS;
+using CMS.Base;
+
 using Kentico.Activities.Web.Mvc;
 using Kentico.Commerce.Web.Mvc;
 using Kentico.Content.Web.Mvc.Routing;
+using Kentico.EmailBuilder.Web.Mvc;
 using Kentico.Membership;
 using Kentico.OnlineMarketing.Web.Mvc;
 using Kentico.PageBuilder.Web.Mvc;
+using Kentico.Xperience.Mjml;
 using Kentico.Web.Mvc;
+
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 using Samples.DancingGoat;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using XperienceCommunity.Sustainability;
+
+[assembly: AssemblyDiscoverable]
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,13 +53,12 @@ builder.Services.AddKentico(features =>
         }
     });
 
+    features.UseEmailBuilder();
     features.UseWebPageRouting();
     features.UseEmailMarketing();
     features.UseEmailStatisticsLogging();
     features.UseActivityTracking();
-#pragma warning disable KXE0002 // Commerce feature is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     features.UseCommerce();
-#pragma warning restore KXE0002 // Commerce feature is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 });
 
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
@@ -65,6 +76,7 @@ builder.Services.AddSingleton<IEmailActivityTrackingEvaluator, EmailActivityTrac
 
 builder.Services.AddXperienceCommunitySustainability(builder.Configuration);
 
+ConfigureEmailBuilder(builder.Services);
 ConfigureMembershipServices(builder.Services);
 
 if (builder.Environment.IsDevelopment())
@@ -75,6 +87,8 @@ if (builder.Environment.IsDevelopment())
 var app = builder.Build();
 
 app.InitKentico();
+
+app.InitializeDancingGoat();
 
 app.UseStaticFiles();
 
@@ -165,4 +179,17 @@ static void ConfigureMembershipServices(IServiceCollection services)
     });
 
     services.AddAuthorization();
+}
+
+
+static void ConfigureEmailBuilder(IServiceCollection services)
+{
+    services.Configure((EmailBuilderOptions options) =>
+    {
+        options.AllowedEmailContentTypeNames = ["DancingGoat.BuilderEmail"];
+        options.RegisterDefaultSection = false;
+        options.DefaultSectionIdentifier = DancingGoatFullWidthEmailSection.IDENTIFIER;
+    });
+
+    services.AddMjmlForEmails();
 }

@@ -1,4 +1,4 @@
-﻿@using DancingGoat.InlineEditors
+﻿﻿@using DancingGoat.InlineEditors
 @using DancingGoat.Widgets
 
 @model DancingGoat.Widgets.CardWidgetViewModel
@@ -18,11 +18,11 @@
             {
                 <partial name="~/Components/InlineEditors/TextEditor/_TextEditor.cshtml"
                          model="new TextEditorViewModel
-                                {
-                                    PropertyName = nameof(CardWidgetProperties.Text),
-                                    Text = Model.Text,
-                                }" />
-            }
+                         {
+                             PropertyName = nameof(CardWidgetProperties.Text),
+                             Text = Model.Text,
+                         }" />
+                        }
             else
             {
                 @Model.Text

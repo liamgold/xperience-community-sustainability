@@ -16,7 +16,8 @@ A community-driven open-source package that brings sustainability insights and a
 
 | Xperience Version | Library Version |
 | ----------------- | --------------- |
-| >= 30.4.2         | 1.0.0           |
+| >= 30.12.0        | 3.x             |
+| >= 30.4.2         | 1.x - 2.x       |
 
 ## Dependencies
 

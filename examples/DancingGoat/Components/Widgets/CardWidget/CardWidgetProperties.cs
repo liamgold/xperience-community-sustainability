@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-
-using CMS.ContentEngine;
-
+﻿using CMS.ContentEngine;
 using Kentico.PageBuilder.Web.Mvc;
 using Kentico.Xperience.Admin.Base.FormAnnotations;
+using System.Collections.Generic;
 
 namespace DancingGoat.Widgets
 {
@@ -15,7 +13,7 @@ namespace DancingGoat.Widgets
         /// <summary>
         /// Image to be displayed.
         /// </summary>
-        [ContentItemSelectorComponent(Models.Image.CONTENT_TYPE_NAME, Label = "Image", Order = 1)]
+        [ContentItemSelectorComponent(Models.Image.CONTENT_TYPE_NAME, Label = "{$dancinggoat.cardwidget.image.label$}", Order = 1)]
         public IEnumerable<ContentItemReference> Image { get; set; } = new List<ContentItemReference>();
 
         /// <summary>

@@ -21,24 +21,21 @@ namespace DancingGoat.Controllers
 {
     public class DancingGoatProductDetailController : Controller
     {
-        private readonly IWebPageDataContextRetriever webPageDataContextRetriever;
-        private readonly ProductPageRepository productPageRepository;
-        private readonly IProductParametersExtractor productParametersExtractor;
-        private readonly IProductVariantsExtractor productVariantsExtractor;
-        private readonly ITagTitleRetriever tagTitleRetriever;
+        private readonly IContentRetriever contentRetriever;
+        private readonly ProductParametersExtractor productParametersExtractor;
+        private readonly ProductVariantsExtractor productVariantsExtractor;
+        private readonly TagTitleRetriever tagTitleRetriever;
         private readonly IPreferredLanguageRetriever currentLanguageRetriever;
 
 
         public DancingGoatProductDetailController(
-            IWebPageDataContextRetriever webPageDataContextRetriever,
-            ProductPageRepository productPageRepository,
-            IProductParametersExtractor productParametersExtractor,
-            IProductVariantsExtractor productVariantsExtractor,
-            ITagTitleRetriever tagTitleRetriever,
+            IContentRetriever contentRetriever,
+            ProductParametersExtractor productParametersExtractor,
+            ProductVariantsExtractor productVariantsExtractor,
+            TagTitleRetriever tagTitleRetriever,
             IPreferredLanguageRetriever currentLanguageRetriever)
         {
-            this.webPageDataContextRetriever = webPageDataContextRetriever;
-            this.productPageRepository = productPageRepository;
+            this.contentRetriever = contentRetriever;
             this.productParametersExtractor = productParametersExtractor;
             this.productVariantsExtractor = productVariantsExtractor;
             this.tagTitleRetriever = tagTitleRetriever;
@@ -48,13 +45,17 @@ namespace DancingGoat.Controllers
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            // Web page identification data
-            var webPageData = webPageDataContextRetriever.Retrieve().WebPage;
-            var webPageItemId = webPageData.WebPageItemID;
             var languageName = currentLanguageRetriever.Get();
+            var productPage = await contentRetriever.RetrieveCurrentPage<ProductPage>(
+                new RetrieveCurrentPageParameters
+                {
+                    LinkedItemsMaxLevel = 2,
+                    IncludeSecuredItems = User.Identity.IsAuthenticated
+                },
+                cancellationToken
+            );
 
-            var productPage = await productPageRepository.GetProductPage(webPageItemId, languageName, cancellationToken);
-            if (productPage == null)
+            if (productPage == null || !productPage.ProductPageProduct.Any())
             {
                 return NotFound();
             }

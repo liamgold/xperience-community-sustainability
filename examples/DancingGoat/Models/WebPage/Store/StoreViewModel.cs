@@ -36,7 +36,8 @@ namespace DancingGoat.Models
                 productSections.Add(new ProductSectionListViewModel(
                     productSectionTag.Title,
                     products
-                        .Where(product => product.ProductFieldTags.Any(t => t.Identifier == productSectionTag.Identifier))
+                        .Where(product => product.ProductFieldTags.Any(t => t.Identifier == productSectionTag.Identifier)
+                            && productPageUrls.ContainsKey((product as IContentItemFieldsSource).SystemFields.ContentItemID))
                         .Select(product =>
                         {
                             productPageUrls.TryGetValue((product as IContentItemFieldsSource).SystemFields.ContentItemID, out var pageUrl);

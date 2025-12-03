@@ -402,6 +402,7 @@ FodyWeavers.xsd
 
 # Client build artifacts
 src/Client/dist/*
+src/wwwroot/scripts/resource-checker.js
 
 # Include specific project configuration files
 !.idea/misc.xml

@@ -1,4 +1,7 @@
-﻿using DancingGoat.Commerce;
+﻿
+using CMS.Commerce;
+
+using DancingGoat.Commerce;
 using DancingGoat.Models;
 using DancingGoat.Services;
 using DancingGoat.ViewComponents;
@@ -15,41 +18,45 @@ namespace DancingGoat
         public static void AddDancingGoatServices(this IServiceCollection services)
         {
             AddViewComponentServices(services);
-            AddRepositories(services);
+            AddCommerceServices(services);
 
-            services.AddSingleton<ICurrentWebsiteChannelPrimaryLanguageRetriever, CurrentWebsiteChannelPrimaryLanguageRetriever>();
-            services.AddSingleton<IProductParametersExtractor, ProductParametersExtractor>();
-            services.AddSingleton<IProductVariantsExtractor, ProductVariantsExtractor>();
-            services.AddSingleton<ITagTitleRetriever, TagTitleRetriever>();
-            services.AddSingleton<IWebPageUrlProvider, WebPageUrlProvider>();
-            services.AddSingleton<IOrderService, OrderService>();
-            services.AddSingleton<ICustomerDataRetriever, CustomerDataRetriever>();
-            services.AddSingleton<ProductNameProvider>();
-            services.AddSingleton<RazorPriceFormatter>();
-            services.AddSingleton<IOrderNumberGenerator, OrderNumberGenerator>();
+            services.AddSingleton<CurrentWebsiteChannelPrimaryLanguageRetriever>();
+            services.AddSingleton<TagTitleRetriever>();
+            services.AddSingleton<WebPageUrlProvider>();
         }
 
 
-        private static void AddRepositories(IServiceCollection services)
+        private static void AddCommerceServices(IServiceCollection services)
         {
-            services.AddSingleton<SocialLinkRepository>();
-            services.AddSingleton<ContactRepository>();
-            services.AddSingleton<HomePageRepository>();
-            services.AddSingleton<ArticlePageRepository>();
-            services.AddSingleton<ArticlesSectionRepository>();
-            services.AddSingleton<ConfirmationPageRepository>();
-            services.AddSingleton<ImageRepository>();
-            services.AddSingleton<CafeRepository>();
-            services.AddSingleton<NavigationItemRepository>();
-            services.AddSingleton<ContactsPageRepository>();
-            services.AddSingleton<PrivacyPageRepository>();
-            services.AddSingleton<LandingPageRepository>();
-            services.AddSingleton<ProductSectionRepository>();
-            services.AddSingleton<ProductPageRepository>();
-            services.AddSingleton<ProductRepository>();
-            services.AddSingleton<StoreRepository>();
-            services.AddSingleton<ProductCategoryRepository>();
+            services.AddSingleton<ProductSkuValidationEventHandler>();
+
+            services.AddSingleton<OrderService>();
+            services.AddSingleton<CalculationService>();
+            services.AddSingleton<CustomerDataRetriever>();
+            services.AddSingleton<ProductNameProvider>();
+            services.AddSingleton<OrderNumberGenerator>();
+            services.AddSingleton<ProductSkuValidator>();
+            services.AddSingleton<ProductParametersExtractor>();
+            services.AddSingleton<ProductVariantsExtractor>();
             services.AddSingleton<CountryStateRepository>();
+            services.AddSingleton<ProductRepository>();
+            services.AddSingleton<PaymentRepository>();
+            services.AddSingleton<ShippingRepository>();
+            services.AddTransient<IPriceFormatter, PriceFormatter>();
+
+            // Register extractors for product types
+            services.AddSingleton<IProductTypeParametersExtractor, ProductManufacturerExtractor>();
+            services.AddSingleton<IProductTypeParametersExtractor, CoffeeParametersExtractor>();
+            services.AddSingleton<IProductTypeParametersExtractor, GrinderParametersExtractor>();
+            services.AddSingleton<IProductTypeParametersExtractor, ProductTemplateAlphaSizeParametersExtractor>();
+
+#pragma warning disable KXE0005 // Price calculation and order creation feature is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            services.AddTransient(typeof(ITaxPriceCalculationStep<,>), typeof(DancingGoatTaxPriceCalculationStep<,>));
+            services.AddTransient(typeof(IProductDataRetriever<,>), typeof(ProductDataRetriever<,>));
+#pragma warning restore KXE0005 // Price calculation and order creation feature is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+            // Register extractors for product type variants
+            services.AddSingleton<IProductTypeVariantsExtractor, ProductTemplateAlphaSizeVariantsExtractor>();
         }
 
 

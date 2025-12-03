@@ -18,7 +18,6 @@ using Kentico.Content.Web.Mvc.Routing;
 
 using Microsoft.AspNetCore.Mvc;
 
-#pragma warning disable KXE0002 // Commerce feature is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 [assembly: RegisterWebPageRoute(ShoppingCart.CONTENT_TYPE_NAME, typeof(DancingGoatShoppingCartController), WebsiteChannelNames = new[] { DancingGoatConstants.WEBSITE_CHANNEL_NAME })]
 
 namespace DancingGoat.Commerce;
@@ -28,67 +27,70 @@ namespace DancingGoat.Commerce;
 /// </summary>
 public sealed class DancingGoatShoppingCartController : Controller
 {
-    private readonly ICurrentShoppingCartService currentShoppingCartService;
-    private readonly IPreferredLanguageRetriever currentLanguageRetriever;
-    private readonly IProductVariantsExtractor productVariantsExtractor;
+    private readonly ICurrentShoppingCartRetriever currentShoppingCartRetriever;
+    private readonly ICurrentShoppingCartCreator currentShoppingCartCreator;
+    private readonly ProductVariantsExtractor productVariantsExtractor;
+    private readonly WebPageUrlProvider webPageUrlProvider;
     private readonly ProductRepository productRepository;
-    private readonly ProductPageRepository productPageRepository;
-    private readonly IWebPageUrlProvider webPageUrlProvider;
+    private readonly CalculationService calculationService;
 
-
-    public DancingGoatShoppingCartController(ICurrentShoppingCartService currentShoppingCartService,
-        IPreferredLanguageRetriever currentLanguageRetriever, IProductVariantsExtractor productVariantsExtractor,
-        ProductRepository productRepository, ProductPageRepository productPageRepository, IWebPageUrlProvider webPageUrlProvider)
+    public DancingGoatShoppingCartController(
+        ICurrentShoppingCartRetriever currentShoppingCartRetriever,
+        ICurrentShoppingCartCreator currentShoppingCartCreator,
+        ProductVariantsExtractor productVariantsExtractor,
+        WebPageUrlProvider webPageUrlProvider,
+        ProductRepository productRepository,
+        CalculationService calculationService)
     {
-        this.currentShoppingCartService = currentShoppingCartService;
-        this.currentLanguageRetriever = currentLanguageRetriever;
+        this.currentShoppingCartRetriever = currentShoppingCartRetriever;
+        this.currentShoppingCartCreator = currentShoppingCartCreator;
         this.productVariantsExtractor = productVariantsExtractor;
-        this.productRepository = productRepository;
-        this.productPageRepository = productPageRepository;
         this.webPageUrlProvider = webPageUrlProvider;
+        this.productRepository = productRepository;
+        this.calculationService = calculationService;
     }
 
 
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        // Web page identification data
-        var languageName = currentLanguageRetriever.Get();
-
-        var shoppingCart = await currentShoppingCartService.Get(cancellationToken);
+        var shoppingCart = await currentShoppingCartRetriever.Get(cancellationToken);
         if (shoppingCart == null)
         {
-            return View(new ShoppingCartViewModel(new List<ShoppingCartItemViewModel>(), 0));
+            return View(new ShoppingCartViewModel(new List<ShoppingCartItemViewModel>(), 0, 0, 0));
         }
 
         var shoppingCartData = shoppingCart.GetShoppingCartDataModel();
 
-        var products = await productRepository.GetProducts(shoppingCartData.Items.Select(item => item.ContentItemId).ToList(), languageName, cancellationToken);
-        var productPageUrls = await productPageRepository.GetProductPageUrls(products.Cast<IContentItemFieldsSource>(), languageName, cancellationToken);
+        var products = await productRepository.GetProductsByIds(shoppingCartData.Items.Select(item => item.ProductIdentifier.Identifier), cancellationToken);
 
-        var totalPrice = CalculationService.CalculateTotalPrice(shoppingCartData, products);
+        var productPageUrls = await productRepository.GetProductPageUrls(products.Cast<IContentItemFieldsSource>().Select(p => p.SystemFields.ContentItemID), cancellationToken);
+
+        var calculationResult = await calculationService.CalculateWithNoShipping(shoppingCartData, cancellationToken);
 
         return View(new ShoppingCartViewModel(
             shoppingCartData.Items.Select(item =>
             {
-                var product = products.FirstOrDefault(product => (product as IContentItemFieldsSource)?.SystemFields.ContentItemID == item.ContentItemId);
+                var product = products.FirstOrDefault(product => (product as IContentItemFieldsSource)?.SystemFields.ContentItemID == item.ProductIdentifier.Identifier);
                 var variantValues = product == null ? null : productVariantsExtractor.ExtractVariantsValue(product);
-                productPageUrls.TryGetValue(item.ContentItemId, out var pageUrl);
+                productPageUrls.TryGetValue(item.ProductIdentifier.Identifier, out var pageUrl);
 
                 return product == null
                     ? null
                     : new ShoppingCartItemViewModel(
-                        item.ContentItemId,
-                        FormatProductName(product.ProductFieldName, variantValues, item.VariantId),
+                        item.ProductIdentifier.Identifier,
+                        FormatProductName(product.ProductFieldName, variantValues, item.ProductIdentifier.VariantIdentifier),
                         product.ProductFieldImage.FirstOrDefault()?.ImageFile.Url,
                         pageUrl,
                         item.Quantity,
                         product.ProductFieldPrice,
                         item.Quantity * product.ProductFieldPrice,
-                        item.VariantId);
+                        item.ProductIdentifier.VariantIdentifier);
             })
             .Where(x => x != null)
             .ToList(),
-            totalPrice));
+            calculationResult.GrandTotal,
+            calculationResult.Subtotal,
+            calculationResult.TotalTax));
     }
 
 
@@ -107,7 +109,7 @@ public sealed class DancingGoatShoppingCartController : Controller
 
         var shoppingCart = await GetCurrentShoppingCart();
 
-        UpdateQuantity(shoppingCart, contentItemId, quantity, variantId, setAbsoluteValue: new[] { "RemoveAll", "Update" }.Contains(action));
+        UpdateQuantity(shoppingCart, new ProductVariantIdentifier { Identifier = contentItemId, VariantIdentifier = variantId }, quantity, setAbsoluteValue: new[] { "RemoveAll", "Update" }.Contains(action));
 
         shoppingCart.Update();
 
@@ -121,7 +123,7 @@ public sealed class DancingGoatShoppingCartController : Controller
     {
         var shoppingCart = await GetCurrentShoppingCart();
 
-        UpdateQuantity(shoppingCart, contentItemId, quantity, variantId);
+        UpdateQuantity(shoppingCart, new ProductVariantIdentifier { Identifier = contentItemId, VariantIdentifier = variantId }, quantity);
 
         shoppingCart.Update();
 
@@ -140,11 +142,11 @@ public sealed class DancingGoatShoppingCartController : Controller
     /// <summary>
     /// Updates the quantity of the product in the shopping cart.
     /// </summary>
-    private static void UpdateQuantity(ShoppingCartInfo shoppingCart, int contentItemId, int quantity, int? variantId, bool setAbsoluteValue = false)
+    private static void UpdateQuantity(ShoppingCartInfo shoppingCart, ProductVariantIdentifier productIdentifier, int quantity, bool setAbsoluteValue = false)
     {
         var shoppingCartData = shoppingCart.GetShoppingCartDataModel();
 
-        var productItem = shoppingCartData.Items.FirstOrDefault(x => x.ContentItemId == contentItemId && x.VariantId == variantId);
+        var productItem = shoppingCartData.Items.FirstOrDefault(x => x.ProductIdentifier == productIdentifier);
         if (productItem != null)
         {
             productItem.Quantity = setAbsoluteValue ? quantity : Math.Max(0, productItem.Quantity + quantity);
@@ -155,7 +157,11 @@ public sealed class DancingGoatShoppingCartController : Controller
         }
         else if (quantity > 0)
         {
-            shoppingCartData.Items.Add(new ShoppingCartDataItem { ContentItemId = contentItemId, Quantity = quantity, VariantId = variantId });
+            shoppingCartData.Items.Add(new ShoppingCartDataItem
+            {
+                ProductIdentifier = productIdentifier,
+                Quantity = quantity
+            });
         }
 
         shoppingCart.StoreShoppingCartDataModel(shoppingCartData);
@@ -167,11 +173,10 @@ public sealed class DancingGoatShoppingCartController : Controller
     /// </summary>
     private async Task<ShoppingCartInfo> GetCurrentShoppingCart()
     {
-        var shoppingCart = await currentShoppingCartService.Get();
+        var shoppingCart = await currentShoppingCartRetriever.Get();
 
-        shoppingCart ??= await currentShoppingCartService.Create(null);
+        shoppingCart ??= await currentShoppingCartCreator.Create();
 
         return shoppingCart;
     }
 }
-#pragma warning restore KXE0002 // Commerce feature is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

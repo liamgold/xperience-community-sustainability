@@ -2,4 +2,4 @@
 
 namespace DancingGoat.Models;
 
-public record ShoppingCartViewModel(ICollection<ShoppingCartItemViewModel> Items, decimal TotalPrice);
+public record ShoppingCartViewModel(ICollection<ShoppingCartItemViewModel> Items, decimal TotalPrice, decimal Subtotal, decimal TotalTax);
