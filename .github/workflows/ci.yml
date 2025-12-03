@@ -19,6 +19,19 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Install client dependencies
+      run: npm ci
+      working-directory: src/Client
+
+    - name: Build client assets
+      run: npm run build
+      working-directory: src/Client
+
     - name: Restore dependencies
       run: dotnet restore
 

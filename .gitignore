@@ -400,6 +400,9 @@ FodyWeavers.xsd
 # Exclude the entire .idea folder for JetBrains IDEs
 .idea/
 
+# Client build artifacts
+src/Client/dist/*
+
 # Include specific project configuration files
 !.idea/misc.xml
 !.idea/modules.xml
