@@ -46,7 +46,4 @@
 		<None Include="..\LICENSE.md" Pack="true" PackagePath="" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Folder Include="wwwroot\scripts\" />
-	</ItemGroup>
 </Project>
