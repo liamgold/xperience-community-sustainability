@@ -25,6 +25,7 @@ namespace DancingGoat.Models
 
             var selection = new ProductSectionListViewModel(null,
                 products
+                    .Where(product => productPageUrls.ContainsKey((product as IContentItemFieldsSource).SystemFields.ContentItemID))
                     .Select(product =>
                     {
                         productPageUrls.TryGetValue((product as IContentItemFieldsSource).SystemFields.ContentItemID, out string pageUrl);
@@ -32,7 +33,6 @@ namespace DancingGoat.Models
                         return ProductListItemViewModel.GetViewModel(
                         product,
                         pageUrl,
-                        languageName,
                         productTagsTaxonomy.Tags.FirstOrDefault(tag => tag.Identifier == product.ProductFieldTags.FirstOrDefault()?.Identifier)?.Title);
                     })
                     .OrderBy(product => product.Name));

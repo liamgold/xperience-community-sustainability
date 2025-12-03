@@ -14,8 +14,8 @@
     "build:resource-checker": "webpack --config webpack.resource-checker.config.js"
   },
   "dependencies": {
-    "@kentico/xperience-admin-base": "30.4.2",
-    "@kentico/xperience-admin-components": "30.4.2",
+    "@kentico/xperience-admin-base": "30.12.0",
+    "@kentico/xperience-admin-components": "30.12.0",
     "@tgwf/co2": "^0.17.0",
     "css-loader": "^7.1.2",
     "postcss-loader": "^8.2.0",
@@ -29,7 +29,7 @@
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
-    "@kentico/xperience-webpack-config": "30.4.2",
+    "@kentico/xperience-webpack-config": "30.12.0",
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18.3.6",
     "babel-loader": "^10.0.0",

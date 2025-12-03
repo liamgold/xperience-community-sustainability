@@ -2,8 +2,8 @@
 
 using CMS.ContentEngine;
 
-using Kentico.Forms.Web.Mvc;
 using Kentico.PageBuilder.Web.Mvc;
+using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.Base.FormAnnotations;
 
 namespace DancingGoat.Widgets
@@ -16,7 +16,7 @@ namespace DancingGoat.Widgets
         /// <summary>
         /// Background image.
         /// </summary>
-        [ContentItemSelectorComponent(Models.Image.CONTENT_TYPE_NAME, Label = "Background image", Order = 1)]
+        [ContentItemSelectorComponent(Models.Image.CONTENT_TYPE_NAME, Label = "{$dancinggoat.heroimagewidget.image.label$}", Order = 1)]
         public IEnumerable<ContentItemReference> Image { get; set; } = new List<ContentItemReference>();
 
 
@@ -35,15 +35,18 @@ namespace DancingGoat.Widgets
         /// <summary>
         /// Target of button link.
         /// </summary>
-        [TextInputComponent(Label = "Button target", Order = 2)]
+        [TextInputComponent(Label = "{$dancinggoat.heroimagewidget.buttontarget.label$}", Order = 2)]
         [UrlValidationRule(AllowRelativeUrl = true, AllowFragmentUrl = true)]
+        [ExcludeFromAiraTranslation]
         public string ButtonTarget { get; set; }
 
 
         /// <summary>
         /// Theme of the widget.
         /// </summary>
-        [DropDownComponent(Label = "Color scheme", Order = 3, Options = "light;Light\ndark;Dark")]
+        [DropDownComponent(Label = "{$dancinggoat.heroimagewidget.theme.label$}", Order = 3,
+            Options = "light;{$dancinggoat.heroimagewidget.theme.option.light$}\ndark;{$dancinggoat.heroimagewidget.theme.option.dark$}")]
+        [ExcludeFromAiraTranslation]
         public string Theme { get; set; } = "dark";
     }
 }

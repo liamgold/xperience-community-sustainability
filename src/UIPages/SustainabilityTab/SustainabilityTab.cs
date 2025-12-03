@@ -184,7 +184,7 @@ public class LoadMoreHistoryCommandData
     public int PageIndex { get; set; }
 }
 
-public sealed class SustainabilityTabProperties : TemplateClientProperties
+public sealed class SustainabilityTabProperties : WebPageBaseClientProperties
 {
     public PageAvailabilityStatus PageAvailability { get; set; }
 
