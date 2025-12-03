@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Custom Kentico Xperience administration project.",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "webpack serve --mode development",
     "dev:buildlike": "webpack serve --mode development --env buildlike=true",
