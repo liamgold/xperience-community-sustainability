@@ -1,5 +1,8 @@
-﻿using CMS.Core;
+﻿using CMS.ContentEngine;
+using CMS.Core;
 using CMS.DataEngine;
+using CMS.Websites;
+using CMS.Websites.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
@@ -16,6 +19,8 @@ public interface ISustainabilityService
     Task<(IEnumerable<SustainabilityResponse> reports, bool hasMore)> GetReportHistory(int webPageItemID, string languageName, int? excludeReportId = null, int limit = 10, int pageIndex = 0);
 
     Task<SustainabilityResponse?> RunNewReport(string url, int webPageItemID, string languageName);
+
+    Task<DashboardResponse> GetChannelDashboard(int channelId, string languageName);
 }
 
 public class SustainabilityService : ISustainabilityService
@@ -23,6 +28,8 @@ public class SustainabilityService : ISustainabilityService
     private readonly IEventLogService _eventLogService;
     private readonly IInfoProvider<SustainabilityPageDataInfo> _sustainabilityPageDataInfoProvider;
     private readonly IContentHubLinkService _contentHubLinkService;
+    private readonly IContentQueryExecutor _contentQueryExecutor;
+    private readonly IWebPageUrlRetriever _webPageUrlRetriever;
     private readonly SustainabilityOptions _options;
 
     private static readonly string ScriptPath = GetScriptPath();
@@ -41,11 +48,15 @@ public class SustainabilityService : ISustainabilityService
         IEventLogService eventLogService,
         IInfoProvider<SustainabilityPageDataInfo> sustainabilityPageDataInfoProvider,
         IContentHubLinkService contentHubLinkService,
+        IContentQueryExecutor contentQueryExecutor,
+        IWebPageUrlRetriever webPageUrlRetriever,
         IOptions<SustainabilityOptions> options)
     {
         _eventLogService = eventLogService;
         _sustainabilityPageDataInfoProvider = sustainabilityPageDataInfoProvider;
         _contentHubLinkService = contentHubLinkService;
+        _contentQueryExecutor = contentQueryExecutor;
+        _webPageUrlRetriever = webPageUrlRetriever;
         _options = options.Value;
     }
 
@@ -403,6 +414,80 @@ public class SustainabilityService : ISustainabilityService
         {
             TotalSize = transferSize / 1024m,
             Resources = resourceList
+        };
+    }
+
+    public async Task<DashboardResponse> GetChannelDashboard(int channelId, string languageName)
+    {
+        // Get all unique (WebPageItemID, LanguageName) combinations with their latest reports
+        var allReports = await _sustainabilityPageDataInfoProvider.Get()
+            .WhereEquals(nameof(SustainabilityPageDataInfo.LanguageName), languageName)
+            .OrderByDescending(nameof(SustainabilityPageDataInfo.DateCreated))
+            .GetEnumerableTypedResultAsync();
+
+        // Group by WebPageItemID and get the latest report for each page
+        var latestReports = allReports
+            .GroupBy(r => r.WebPageItemID)
+            .Select(g => g.First())
+            .ToList();
+
+        var pages = new List<DashboardPageItem>();
+
+        // Query web pages to get page details
+        var webPageItemIds = latestReports.Select(r => r.WebPageItemID).ToList();
+
+        if (webPageItemIds.Any())
+        {
+            var builder = new ContentItemQueryBuilder()
+                .ForContentTypes(query =>
+                {
+                    query.ForWebsite(webPageItemIds);
+                })
+                .InLanguage(languageName);
+
+            var webPages = await _contentQueryExecutor.GetMappedWebPageResult<IWebPageFieldsSource>(builder);
+
+            // Create dashboard page items
+            foreach (var report in latestReports)
+            {
+                var webPage = webPages.FirstOrDefault(p => p.SystemFields.WebPageItemID == report.WebPageItemID);
+                if (webPage == null) continue;
+
+                var url = await _webPageUrlRetriever.Retrieve(report.WebPageItemID, languageName);
+
+                pages.Add(new DashboardPageItem
+                {
+                    WebPageItemID = report.WebPageItemID,
+                    PageName = webPage.SystemFields.WebPageItemName,
+                    PageUrl = url?.RelativePath ?? string.Empty,
+                    LanguageName = report.LanguageName,
+                    CarbonRating = report.CarbonRating,
+                    TotalEmissions = report.TotalEmissions,
+                    TotalSize = report.TotalSize,
+                    GreenHostingStatus = report.GreenHostingStatus,
+                    LastRunDate = report.DateCreated.ToString("MMMM dd, yyyy h:mm tt"),
+                    DateCreated = report.DateCreated
+                });
+            }
+        }
+
+        // Calculate summary statistics
+        var summary = new DashboardSummary
+        {
+            TotalPages = pages.Count,
+            AverageEmissions = pages.Any() ? pages.Average(p => p.TotalEmissions) : 0,
+            AveragePageWeight = pages.Any() ? pages.Average(p => p.TotalSize) : 0,
+            GreenHostingCount = pages.Count(p => p.GreenHostingStatus == "Green"),
+            RatingDistribution = pages
+                .Where(p => !string.IsNullOrEmpty(p.CarbonRating))
+                .GroupBy(p => p.CarbonRating!)
+                .ToDictionary(g => g.Key, g => g.Count())
+        };
+
+        return new DashboardResponse
+        {
+            Summary = summary,
+            Pages = pages.OrderBy(p => p.PageName).ToList()
         };
     }
 

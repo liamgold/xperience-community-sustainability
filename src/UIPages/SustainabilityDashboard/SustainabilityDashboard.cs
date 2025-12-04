@@ -1,29 +1,47 @@
-﻿using Kentico.Xperience.Admin.Base;
-using XperienceCommunity.Sustainability;
+using Kentico.Xperience.Admin.Base;
+using Kentico.Xperience.Admin.Base.Authentication;
 using XperienceCommunity.Sustainability.Admin;
+using XperienceCommunity.Sustainability.Models;
+using XperienceCommunity.Sustainability.Services;
 
-//[assembly: UIApplication(
-//    identifier: "XperienceCommunity.Sustainability",
-//    type: typeof(SustainabilityDashboard),
-//    slug: "sustainability",
-//    name: "Sustainability",
-//    category: SustainabilityAdminModule.CUSTOM_CATEGORY,
-//    icon: Icons.Earth,
-//    templateName: "@sustainability/web-admin/SustainabilityDashboard")]
+[assembly: UIApplication(
+    identifier: "XperienceCommunity.Sustainability",
+    type: typeof(SustainabilityDashboard),
+    slug: "sustainability",
+    name: "Sustainability",
+    category: "Applications",
+    icon: Icons.Earth,
+    templateName: "@sustainability/web-admin/SustainabilityDashboard")]
 
 namespace XperienceCommunity.Sustainability.Admin
 {
-    internal class SustainabilityDashboard : Page<CustomLayoutProperties>
+    internal class SustainabilityDashboard : Page<SustainabilityDashboardProperties>
     {
-        public override Task<CustomLayoutProperties> ConfigureTemplateProperties(CustomLayoutProperties properties)
+        private readonly ISustainabilityService _sustainabilityService;
+
+        public SustainabilityDashboard(
+            ISustainabilityService sustainabilityService)
         {
-            properties.Label = "Coming soon: https://github.com/liamgold/xperience-community-sustainability/issues/4";
-            return Task.FromResult(properties);
+            _sustainabilityService = sustainabilityService;
+        }
+
+        public override async Task<SustainabilityDashboardProperties> ConfigureTemplateProperties(SustainabilityDashboardProperties properties)
+        {
+            // For now, hardcode to English language
+            // TODO: Get from user preferences or allow filtering by language in the UI
+            var languageName = "en-US";
+
+            // For now, we'll get all reports regardless of channel (channelId parameter not used yet)
+            var dashboardData = await _sustainabilityService.GetChannelDashboard(0, languageName);
+
+            properties.DashboardData = dashboardData;
+
+            return properties;
         }
     }
 
-    class CustomLayoutProperties : TemplateClientProperties
+    internal class SustainabilityDashboardProperties : TemplateClientProperties
     {
-        public string? Label { get; set; }
+        public DashboardResponse? DashboardData { get; set; }
     }
 }
