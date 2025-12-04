@@ -13,6 +13,8 @@ namespace XperienceCommunity.Sustainability;
 
 internal class SustainabilityAdminModule : AdminModule
 {
+    public const string CUSTOM_CATEGORY = "Sustainability";
+
     public SustainabilityAdminModule()
         : base(nameof(SustainabilityAdminModule))
     {

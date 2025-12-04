@@ -1,5 +1,5 @@
 using Kentico.Xperience.Admin.Base;
-using Kentico.Xperience.Admin.Base.Authentication;
+using Kentico.Xperience.Admin.Base.UIPages;
 using XperienceCommunity.Sustainability.Admin;
 using XperienceCommunity.Sustainability.Models;
 using XperienceCommunity.Sustainability.Services;
@@ -9,7 +9,7 @@ using XperienceCommunity.Sustainability.Services;
     type: typeof(SustainabilityDashboard),
     slug: "sustainability",
     name: "Sustainability",
-    category: "Applications",
+    category: BaseApplicationCategories.DEVELOPMENT,
     icon: Icons.Earth,
     templateName: "@sustainability/web-admin/SustainabilityDashboard")]
 
@@ -29,7 +29,7 @@ namespace XperienceCommunity.Sustainability.Admin
         {
             // For now, hardcode to English language
             // TODO: Get from user preferences or allow filtering by language in the UI
-            var languageName = "en-US";
+            var languageName = "en";
 
             // For now, we'll get all reports regardless of channel (channelId parameter not used yet)
             var dashboardData = await _sustainabilityService.GetChannelDashboard(0, languageName);
