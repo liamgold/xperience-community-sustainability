@@ -33,9 +33,6 @@ module.exports = (opts, argv) => {
       port: 3009,
     },
     resolve: {
-      alias: {
-        "@": path.resolve(__dirname),
-      },
       extensions: [".js", ".jsx", ".ts", ".tsx"],
     },
   };
