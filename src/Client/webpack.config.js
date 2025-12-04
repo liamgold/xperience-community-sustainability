@@ -23,10 +23,6 @@ module.exports = (opts, argv) => {
           exclude: [/node_modules/],
           loader: "babel-loader",
         },
-        {
-          test: /\.css$/,
-          use: ["style-loader", "css-loader", "postcss-loader"],
-        },
       ],
     },
     output: {
@@ -37,9 +33,6 @@ module.exports = (opts, argv) => {
       port: 3009,
     },
     resolve: {
-      alias: {
-        "@": path.resolve(__dirname),
-      },
       extensions: [".js", ".jsx", ".ts", ".tsx"],
     },
   };
